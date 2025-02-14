@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "67956590325",
+    "project_id": "curves-a48fb",
+    "storage_bucket": "curves-a48fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:67956590325:android:0b51dcf69017454abda7bc",
+        "android_client_info": {
+          "package_name": "com.example.curv"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAk1PJGQ5keQOqN_PsURBcj4HC2J6b7zn8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:67956590325:android:4ee05c4b650487a3bda7bc",
+        "android_client_info": {
+          "package_name": "com.example.curve"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAk1PJGQ5keQOqN_PsURBcj4HC2J6b7zn8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
