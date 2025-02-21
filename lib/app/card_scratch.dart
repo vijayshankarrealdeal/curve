@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:curve/api/colors_provider.dart';
-import 'package:curve/api/scratch_provider.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/scratch_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';

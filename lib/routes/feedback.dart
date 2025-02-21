@@ -1,4 +1,4 @@
-import 'package:curve/api/db.dart';
+import 'package:curve/services/db.dart';
 import 'package:flutter/material.dart';
 
 class FeedbackPage extends StatefulWidget {
@@ -56,14 +56,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
     final improvementSuggestion = _improvementController.text;
     final favoriteFeature = _selectedFeature;
     final additionalFeedback = _additionalFeedbackController.text;
-    Database().addFeedback(
-      rating,
-      easyToUnderstand,
-      improvementSuggestion,
-      favoriteFeature,
-      additionalFeedback
+    // Database().addFeedback(
+    //   rating,
+    //   easyToUnderstand,
+    //   improvementSuggestion,
+    //   favoriteFeature,
+    //   additionalFeedback
 
-    );
+    // );
 
     // Example: show a simple dialog
     showDialog(

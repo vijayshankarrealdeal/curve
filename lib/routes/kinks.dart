@@ -1,7 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:curve/api/colors_provider.dart';
-import 'package:curve/api/responsive.dart';
-import 'package:curve/api/settings_model.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/responsive.dart';
+import 'package:curve/services/settings_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

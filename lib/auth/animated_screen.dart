@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:curve/api/colors_provider.dart';
+import 'package:curve/services/colors_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 

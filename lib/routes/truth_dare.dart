@@ -1,6 +1,6 @@
 import 'dart:math';
-import 'package:curve/api/colors_provider.dart';
-import 'package:curve/api/responsive.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/responsive.dart';
 import 'package:curve/logs/truth_dare_tasks.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

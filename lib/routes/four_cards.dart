@@ -1,7 +1,8 @@
-import 'package:curve/api/colors_provider.dart';
-import 'package:curve/api/responsive.dart';
+
 import 'package:curve/logs/4_cards_task.dart';
 import 'package:curve/models/four_card_model.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/responsive.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;

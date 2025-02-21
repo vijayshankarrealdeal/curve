@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:curve/api/settings_model.dart';
+import 'package:curve/services/settings_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

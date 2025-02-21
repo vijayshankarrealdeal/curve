@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:curve/api/cart_provider.dart';
-import 'package:curve/api/colors_provider.dart';
-import 'package:curve/routes/cart_display.dart';
+import 'package:curve/services/cart_provider.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/routes/learn_details.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

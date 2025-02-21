@@ -1,4 +1,4 @@
-import 'package:curve/api/colors_provider.dart';
+import 'package:curve/services/colors_provider.dart';
 import 'package:curve/auth/animated_screen.dart';
 import 'package:curve/auth/auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -135,7 +135,14 @@ class AuthScreen extends StatelessWidget {
                                                     .trim(),
                                               );
                                             } else {
-                                              authProvider.signup();
+                                              authProvider.signup(
+                                                authProvider
+                                                    .emailController.text
+                                                    .trim(),
+                                                authProvider
+                                                    .passwordController.text
+                                                    .trim(),
+                                              );
                                             }
                                           } catch (e) {
                                             // Show error

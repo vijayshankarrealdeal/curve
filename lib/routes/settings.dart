@@ -1,4 +1,4 @@
-import 'package:curve/api/colors_provider.dart';
+import 'package:curve/services/colors_provider.dart';
 import 'package:curve/auth/auth.dart';
 import 'package:curve/routes/feedback.dart';
 import 'package:curve/routes/kinks.dart';

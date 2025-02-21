@@ -1,5 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:curve/api/responsive.dart';
+import 'package:curve/services/responsive.dart';
 import 'package:curve/models/model.dart';
 import 'package:curve/routes/four_cards.dart';
 import 'package:curve/routes/keyword_obesseion.dart';

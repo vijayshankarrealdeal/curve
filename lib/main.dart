@@ -1,11 +1,13 @@
-import 'package:curve/api/cart_provider.dart';
-import 'package:curve/api/colors_provider.dart';
-import 'package:curve/api/gird_provider.dart';
-import 'package:curve/api/scratch_provider.dart';
+import 'package:curve/services/cart_provider.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/gird_provider.dart';
+import 'package:curve/services/learn_provider.dart';
+import 'package:curve/services/scratch_provider.dart';
 import 'package:curve/app/home.dart';
-import 'package:curve/api/state.dart';
-import 'package:curve/api/settings_model.dart';
+import 'package:curve/services/state.dart';
+import 'package:curve/services/settings_model.dart';
 import 'package:curve/app/card_scratch.dart';
+import 'package:curve/app/learn.dart';
 import 'package:curve/auth/auth.dart';
 import 'package:curve/auth/auth_screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,15 +22,9 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  await Supabase.initialize(
-    url: 'https://igzyldsgabtqtzoptvvb.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnenlsZHNnYWJ0cXR6b3B0dnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcxODA1MzEsImV4cCI6MjA1Mjc1NjUzMX0.LCThsIMH0dq10IkXi_v05Hasz11bLl6Exgi0H68v44g',
-  );
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => NavBar()),
         ChangeNotifierProvider(create: (context) => SettingsModel()),
@@ -37,6 +32,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => ScratchProvider()),
         ChangeNotifierProvider(create: (context) => ColorsProvider()),
         ChangeNotifierProvider(create: (context) => CartProvider()),
+        ChangeNotifierProvider(create: (context) => LearnProvider()),
       ],
       child: const MyApp(),
     ),
@@ -74,14 +70,11 @@ class MyApp extends StatelessWidget {
               brightness: colorProvider.getBrightness()),
           useMaterial3: true,
         ),
-        home: StreamBuilder<AuthState>(
-            stream: auth.getAuth(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData && (snapshot.data!.session != null)) {
-                return const AppPage();
-              }
-              return AuthScreen();
-            }),
+        home: auth.authIsLoading
+            ? CupertinoActivityIndicator()
+            : auth.authState
+                ? const AppPage()
+                : const AuthScreen(),
       );
     });
   }
@@ -96,7 +89,7 @@ class AppPage extends StatelessWidget {
       builder: (context, navBar, colorPro, _) {
         return Scaffold(
           body: [
-            Home(), CardScratch(),
+            Home(), CardScratch(), Learn()
 
             //Gift()
           ][navBar.idx],
@@ -124,15 +117,15 @@ class AppPage extends StatelessWidget {
                         : colorPro.navBarIconActiveColor(),
                   ),
                   label: ""),
-              // NavigationDestination(
-              //     icon: Icon(
-              //       CupertinoIcons.gift,
-              //       size: navBar.idx == 2 ? 32 : 25,
-              //       color: navBar.idx == 2
-              //           ? colorPro.primaryColor()
-              //           : colorPro.navBarIconActiveColor(),
-              //     ),
-              //     label: ""),
+              NavigationDestination(
+                  icon: Icon(
+                    CupertinoIcons.eyeglasses,
+                    size: navBar.idx == 2 ? 32 : 25,
+                    color: navBar.idx == 2
+                        ? colorPro.primaryColor()
+                        : colorPro.navBarIconActiveColor(),
+                  ),
+                  label: ""),
             ],
           ),
         );

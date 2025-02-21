@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:curve/api/colors_provider.dart';
-import 'package:curve/api/gird_provider.dart';
-import 'package:curve/api/responsive.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/gird_provider.dart';
+import 'package:curve/services/responsive.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
