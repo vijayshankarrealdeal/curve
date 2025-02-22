@@ -1,3 +1,4 @@
+import 'package:curve/api/elements.dart';
 import 'package:curve/api/urls.dart';
 import 'package:curve/models/learn_model.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class LearnProvider extends ChangeNotifier {
-  LearnProvider() {
+  final String token;
+  LearnProvider(this.token) {
     getArticles();
   }
   List<Article> articles = [];
@@ -14,8 +16,7 @@ class LearnProvider extends ChangeNotifier {
 
     try {
       // Sending the GET request
-      final response =
-          await http.get(url, headers: {'accept': 'application/json'});
+      final response = await http.get(url, headers: APIElements.headers(token));
 
       // Checking if the request was successful (status code 200)
       if (response.statusCode == 200) {
@@ -35,8 +36,7 @@ class LearnProvider extends ChangeNotifier {
     final Uri url = Uri.parse(APIUrls.SECTION_READINGS(article.id));
     try {
       // Sending the GET request
-      final response =
-          await http.get(url, headers: {'accept': 'application/json'});
+      final response = await http.get(url, headers: APIElements.headers(token));
 
       // Checking if the request was successful (status code 200)
       if (response.statusCode == 200) {
@@ -44,7 +44,7 @@ class LearnProvider extends ChangeNotifier {
         var data = jsonDecode(response.body);
         article.sections = List<SectionsReadings>.from(
             data.map((section) => SectionsReadings.fromJson(section)).toList());
-            notifyListeners();
+        notifyListeners();
         return true;
       }
     } catch (e) {

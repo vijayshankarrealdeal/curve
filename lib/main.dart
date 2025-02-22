@@ -27,12 +27,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => NavBar()),
-        ChangeNotifierProvider(create: (context) => SettingsModel()),
-        ChangeNotifierProvider(create: (context) => GameProvider()),
-        ChangeNotifierProvider(create: (context) => ScratchProvider()),
         ChangeNotifierProvider(create: (context) => ColorsProvider()),
-        ChangeNotifierProvider(create: (context) => CartProvider()),
-        ChangeNotifierProvider(create: (context) => LearnProvider()),
       ],
       child: const MyApp(),
     ),
@@ -73,7 +68,7 @@ class MyApp extends StatelessWidget {
         home: auth.authIsLoading
             ? CupertinoActivityIndicator()
             : auth.authState
-                ? const AppPage()
+                ? AppPage(token: auth.token)
                 : const AuthScreen(),
       );
     });
@@ -81,52 +76,62 @@ class MyApp extends StatelessWidget {
 }
 
 class AppPage extends StatelessWidget {
-  const AppPage({super.key});
+  final String token;
+  const AppPage({super.key, required this.token});
 
   @override
   Widget build(BuildContext context) {
     return Consumer2<NavBar, ColorsProvider>(
       builder: (context, navBar, colorPro, _) {
-        return Scaffold(
-          body: [
-            Home(), CardScratch(), Learn()
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (context) => SettingsModel()),
+            ChangeNotifierProvider(create: (context) => GameProvider()),
+            ChangeNotifierProvider(create: (context) => ScratchProvider()),
+            ChangeNotifierProvider(create: (context) => CartProvider()),
+            ChangeNotifierProvider(create: (context) => LearnProvider(token)),
+          ],
+          child: Scaffold(
+            body: [
+              Home(), CardScratch(), Learn()
 
-            //Gift()
-          ][navBar.idx],
-          bottomNavigationBar: NavigationBar(
-            backgroundColor: colorPro.getAppBarColor(),
-            selectedIndex: navBar.idx,
-            onDestinationSelected: (idx) => navBar.change(idx),
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-            destinations: [
-              NavigationDestination(
-                  icon: Icon(
-                    CupertinoIcons.home,
-                    size: navBar.idx == 0 ? 32 : 25,
-                    color: navBar.idx == 0
-                        ? colorPro.primaryColor()
-                        : colorPro.navBarIconActiveColor(),
-                  ),
-                  label: ""),
-              NavigationDestination(
-                  icon: Icon(
-                    CupertinoIcons.app,
-                    size: navBar.idx == 1 ? 32 : 25,
-                    color: navBar.idx == 1
-                        ? colorPro.primaryColor()
-                        : colorPro.navBarIconActiveColor(),
-                  ),
-                  label: ""),
-              NavigationDestination(
-                  icon: Icon(
-                    CupertinoIcons.eyeglasses,
-                    size: navBar.idx == 2 ? 32 : 25,
-                    color: navBar.idx == 2
-                        ? colorPro.primaryColor()
-                        : colorPro.navBarIconActiveColor(),
-                  ),
-                  label: ""),
-            ],
+              //Gift()
+            ][navBar.idx],
+            bottomNavigationBar: NavigationBar(
+              backgroundColor: colorPro.getAppBarColor(),
+              selectedIndex: navBar.idx,
+              onDestinationSelected: (idx) => navBar.change(idx),
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+              destinations: [
+                NavigationDestination(
+                    icon: Icon(
+                      CupertinoIcons.home,
+                      size: navBar.idx == 0 ? 32 : 25,
+                      color: navBar.idx == 0
+                          ? colorPro.primaryColor()
+                          : colorPro.navBarIconActiveColor(),
+                    ),
+                    label: ""),
+                NavigationDestination(
+                    icon: Icon(
+                      CupertinoIcons.app,
+                      size: navBar.idx == 1 ? 32 : 25,
+                      color: navBar.idx == 1
+                          ? colorPro.primaryColor()
+                          : colorPro.navBarIconActiveColor(),
+                    ),
+                    label: ""),
+                NavigationDestination(
+                    icon: Icon(
+                      CupertinoIcons.eyeglasses,
+                      size: navBar.idx == 2 ? 32 : 25,
+                      color: navBar.idx == 2
+                          ? colorPro.primaryColor()
+                          : colorPro.navBarIconActiveColor(),
+                    ),
+                    label: ""),
+              ],
+            ),
           ),
         );
       },
