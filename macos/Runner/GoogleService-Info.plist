@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>828216880386-llqkcc3ll3hm49ett5a0aoe62s5r5vt6.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.828216880386-llqkcc3ll3hm49ett5a0aoe62s5r5vt6</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCxUbdiUthWmAGpA_sBk92mNAsUz3DLL-Q</string>
+	<key>GCM_SENDER_ID</key>
+	<string>828216880386</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.curve</string>
+	<key>PROJECT_ID</key>
+	<string>evesdrops-46b4b</string>
+	<key>STORAGE_BUCKET</key>
+	<string>evesdrops-46b4b.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:828216880386:ios:4273c3a23104fc8b2fe61b</string>
+</dict>
+</plist>

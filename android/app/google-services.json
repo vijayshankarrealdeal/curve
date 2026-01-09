@@ -1,45 +1,79 @@
 {
   "project_info": {
-    "project_number": "67956590325",
-    "project_id": "curves-a48fb",
-    "storage_bucket": "curves-a48fb.firebasestorage.app"
+    "project_number": "828216880386",
+    "project_id": "evesdrops-46b4b",
+    "storage_bucket": "evesdrops-46b4b.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:67956590325:android:0b51dcf69017454abda7bc",
+        "mobilesdk_app_id": "1:828216880386:android:cd606e98e9ceffaf2fe61b",
         "android_client_info": {
-          "package_name": "com.example.curv"
+          "package_name": "com.example.curve"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "828216880386-suqrpjkkq7lomol8m2n15hln031pca7k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAk1PJGQ5keQOqN_PsURBcj4HC2J6b7zn8"
+          "current_key": "AIzaSyDdceP3x7glrNq46CAQNzYdcCicNMTfC70"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "828216880386-suqrpjkkq7lomol8m2n15hln031pca7k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "828216880386-tauu0ure9o370pgqtqr1ki989na5mbk2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.evesdrops"
+              }
+            }
+          ]
         }
       }
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:67956590325:android:4ee05c4b650487a3bda7bc",
+        "mobilesdk_app_id": "1:828216880386:android:e17e21d5e5c510a22fe61b",
         "android_client_info": {
-          "package_name": "com.example.curve"
+          "package_name": "com.example.evesdrops"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "828216880386-suqrpjkkq7lomol8m2n15hln031pca7k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAk1PJGQ5keQOqN_PsURBcj4HC2J6b7zn8"
+          "current_key": "AIzaSyDdceP3x7glrNq46CAQNzYdcCicNMTfC70"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "828216880386-suqrpjkkq7lomol8m2n15hln031pca7k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "828216880386-tauu0ure9o370pgqtqr1ki989na5mbk2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.evesdrops"
+              }
+            }
+          ]
         }
       }
     }

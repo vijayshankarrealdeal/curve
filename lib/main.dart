@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +24,9 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     MultiProvider(
       providers: [
@@ -42,6 +47,7 @@ class MyApp extends StatelessWidget {
     return Consumer2<ColorsProvider, AuthProvider>(
         builder: (context, colorProvider, auth, _) {
       return MaterialApp(
+        title: 'eavesdrops',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           textTheme: GoogleFonts.ptSansTextTheme().apply(
