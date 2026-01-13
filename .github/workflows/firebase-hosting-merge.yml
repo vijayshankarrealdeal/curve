@@ -20,7 +20,7 @@ jobs:
       - run: flutter pub get
 
       # 4. Build the web app (This creates the build/web folder)
-      - run: flutter build web --release --web-renderer html
+      - run: flutter build web 
 
       # 5. Deploy to Firebase
       - uses: FirebaseExtended/action-hosting-deploy@v0
