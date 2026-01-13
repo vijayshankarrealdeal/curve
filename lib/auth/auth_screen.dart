@@ -1,6 +1,7 @@
 import 'package:curve/services/colors_provider.dart';
 import 'package:curve/auth/animated_screen.dart';
 import 'package:curve/auth/auth.dart';
+import 'package:curve/auth/google_button.dart'; // Import the button widget
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -80,8 +81,6 @@ class AuthScreen extends StatelessWidget {
                                   },
                                 ),
                                 const SizedBox(height: 1),
-
-                                // Confirm Password only for sign up
                                 if (!authProvider.isLogin)
                                   AnimatedSize(
                                     curve: Curves.easeInOut,
@@ -108,7 +107,6 @@ class AuthScreen extends StatelessWidget {
                                     ),
                                   ),
                                 const SizedBox(height: 13),
-
                                 authProvider.isLoading
                                     ? Consumer<ColorsProvider>(
                                         builder: (context, color, _) {
@@ -116,69 +114,78 @@ class AuthScreen extends StatelessWidget {
                                           color: color.lodingColor(),
                                         );
                                       })
-                                    : CupertinoButton(
-                                        onPressed: () async {
-                                          if (!authProvider
-                                              .formKey.currentState!
-                                              .validate()) {
-                                            return;
-                                          }
-
-                                          try {
-                                            if (authProvider.isLogin) {
-                                              authProvider.login(
-                                                authProvider
-                                                    .emailController.text
-                                                    .trim(),
-                                                authProvider
-                                                    .passwordController.text
-                                                    .trim(),
-                                              );
-                                            } else {
-                                              authProvider.signup(
-                                                authProvider
-                                                    .emailController.text
-                                                    .trim(),
-                                                authProvider
-                                                    .passwordController.text
-                                                    .trim(),
-                                              );
-                                            }
-                                          } catch (e) {
-                                            // Show error
-
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title: Text("Error"),
-                                                  content: Text(
-                                                      "An error occurred. Please try again."),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                      child: Text("OK"),
-                                                    ),
-                                                  ],
+                                    : Column(
+                                        children: [
+                                          CupertinoButton(
+                                            onPressed: () async {
+                                              if (!authProvider
+                                                  .formKey.currentState!
+                                                  .validate()) {
+                                                return;
+                                              }
+                                              try {
+                                                if (authProvider.isLogin) {
+                                                  authProvider.login(
+                                                    authProvider
+                                                        .emailController.text
+                                                        .trim(),
+                                                    authProvider
+                                                        .passwordController.text
+                                                        .trim(),
+                                                  );
+                                                } else {
+                                                  authProvider.signup(
+                                                    authProvider
+                                                        .emailController.text
+                                                        .trim(),
+                                                    authProvider
+                                                        .passwordController.text
+                                                        .trim(),
+                                                  );
+                                                }
+                                              } catch (e) {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title:
+                                                          const Text("Error"),
+                                                      content: Text(e
+                                                          .toString()
+                                                          .replaceAll(
+                                                              "Exception: ",
+                                                              "")),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          child:
+                                                              const Text("OK"),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
                                                 );
-                                              },
-                                            );
-                                          } finally {}
-                                        },
-                                        child: Text(
-                                          authProvider.isLogin
-                                              ? 'LOGIN'
-                                              : 'SIGN UP',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                        ),
+                                              }
+                                            },
+                                            child: Text(
+                                              authProvider.isLogin
+                                                  ? 'LOGIN'
+                                                  : 'SIGN UP',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          // GOOGLE BUTTON (Handles Web & Mobile)
+                                          const GoogleButton(),
+                                        ],
                                       ),
-
-                                // Toggle between login and sign up
                                 TextButton(
                                   onPressed: () {
                                     authProvider.toggleAuthMode();
