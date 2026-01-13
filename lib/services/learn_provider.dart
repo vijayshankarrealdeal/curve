@@ -1,56 +1,43 @@
-import 'package:curve/api/elements.dart';
-import 'package:curve/api/urls.dart';
 import 'package:curve/models/learn_model.dart';
+import 'package:curve/services/db.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class LearnProvider extends ChangeNotifier {
-  final String token;
-  LearnProvider(this.token) {
+  final DatabaseService _db = DatabaseService();
+
+  LearnProvider() {
     getArticles();
   }
+
   List<Article> articles = [];
+  bool isLoading = false;
+
   void getArticles() async {
-    final Uri url = Uri.parse(APIUrls.ARTICLES);
+    isLoading = true;
+    // notifyListeners(); // Optional: trigger loading state in UI if needed
 
     try {
-      // Sending the GET request
-      final response = await http.get(url, headers: APIElements.headers(token));
-
-      // Checking if the request was successful (status code 200)
-      if (response.statusCode == 200) {
-        // If successful, parse the response body
-        var data = jsonDecode(response.body);
-        articles = List<Article>.from(
-            data.map((article) => Article.fromJson(article)).toList());
-        articles.sort((a, b) => a.id.compareTo(b.id));
-        notifyListeners();
-      }
+      List<Article> fetchedArticles = await _db.getArticles();
+      articles = fetchedArticles;
+      articles.sort((a, b) => a.id.compareTo(b.id));
+      notifyListeners();
     } catch (e) {
-      print('Error: $e');
+      print('Error fetching articles: $e');
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 
   Future<bool> getArticle(Article article) async {
-    final Uri url = Uri.parse(APIUrls.SECTION_READINGS(article.id));
     try {
-      // Sending the GET request
-      final response = await http.get(url, headers: APIElements.headers(token));
-
-      // Checking if the request was successful (status code 200)
-      if (response.statusCode == 200) {
-        // If successful, parse the response body
-        var data = jsonDecode(response.body);
-        article.sections = List<SectionsReadings>.from(
-            data.map((section) => SectionsReadings.fromJson(section)).toList());
-        notifyListeners();
-        return true;
-      }
+      List<SectionsReadings> sections = await _db.getSections(article.id);
+      article.sections = sections;
+      notifyListeners();
+      return true;
     } catch (e) {
-      print('Error: $e');
+      print('Error fetching sections for article ${article.id}: $e');
       return false;
     }
-    return false;
   }
 }

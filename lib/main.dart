@@ -32,7 +32,12 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => NavBar()),
-        ChangeNotifierProvider(create: (context) => ColorsProvider()),
+        ChangeNotifierProvider(create: (_) => ColorsProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsModel()),
+        ChangeNotifierProvider(create: (_) => GameProvider()),
+        ChangeNotifierProvider(create: (_) => ScratchProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => LearnProvider()),
       ],
       child: const MyApp(),
     ),
@@ -72,9 +77,9 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: auth.authIsLoading
-            ? CupertinoActivityIndicator()
+            ? const Scaffold(body: Center(child: CupertinoActivityIndicator()))
             : auth.authState
-                ? AppPage(token: auth.token)
+                ? const AppPage()
                 : const AuthScreen(),
       );
     });
@@ -82,8 +87,7 @@ class MyApp extends StatelessWidget {
 }
 
 class AppPage extends StatelessWidget {
-  final String token;
-  const AppPage({super.key, required this.token});
+  const AppPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -95,13 +99,13 @@ class AppPage extends StatelessWidget {
             ChangeNotifierProvider(create: (context) => GameProvider()),
             ChangeNotifierProvider(create: (context) => ScratchProvider()),
             ChangeNotifierProvider(create: (context) => CartProvider()),
-            ChangeNotifierProvider(create: (context) => LearnProvider(token)),
+            ChangeNotifierProvider(create: (context) => LearnProvider()),
           ],
           child: Scaffold(
             body: [
-              Home(), CardScratch(), Learn()
-
-              //Gift()
+              const Home(),
+              const CardScratch(),
+              const Learn()
             ][navBar.idx],
             bottomNavigationBar: NavigationBar(
               backgroundColor: colorPro.getAppBarColor(),

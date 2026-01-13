@@ -1,124 +1,105 @@
-import 'package:curve/api/urls.dart';
+import 'package:curve/services/db.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthProvider extends ChangeNotifier {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final DatabaseService _dbService = DatabaseService();
+
   AuthProvider() {
     initAuth();
   }
+
   bool isLogin = true;
-  String token = '';
   bool isLoading = false;
   bool authState = false;
   bool authIsLoading = true;
+  String? userId;
 
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  void initAuth() async {
-    final _storage = await FlutterSecureStorage();
-    String _token = await _storage.read(key: 'token') ?? "";
-    if (_token.isNotEmpty && JwtDecoder.isExpired(_token)) {
-      String email = await _storage.read(key: 'email') ?? "";
-      String password = await _storage.read(key: 'password') ?? "";
-      _token = await login(email, password);
-    } else if (_token.isNotEmpty && !JwtDecoder.isExpired(_token)) {
-      authState = true;
-      token = _token;
-    } else {
-      authState = false;
-    }
-    authIsLoading = false;
-    notifyListeners();
+  void initAuth() {
+    // Listen to Firebase Auth state changes
+    _firebaseAuth.authStateChanges().listen((User? user) {
+      if (user != null) {
+        authState = true;
+        userId = user.uid;
+      } else {
+        authState = false;
+        userId = null;
+      }
+      authIsLoading = false;
+      notifyListeners();
+    });
   }
 
-  Future<String> login(String email, String password) async {
+  Future<void> login(String email, String password) async {
     isLoading = true;
-    final _storage = await FlutterSecureStorage();
-    final url = Uri.parse(APIUrls.LOGIN);
     notifyListeners();
     try {
-      final response = await http.post(
-        url,
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
+      UserCredential cred = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-      token = jsonDecode(response.body)['token'];
-      await Future.wait([
-        _storage.write(key: 'token', value: token),
-        _storage.write(key: 'email', value: email),
-        _storage.write(key: 'password', value: password),
-      ]);
+
+      // Ensure user document exists in Firestore and update login time
+      if (cred.user != null) {
+        await _dbService.createUser(cred.user!.uid, email);
+      }
 
       isLoading = false;
-      authState = true;
+      notifyListeners();
+    } on FirebaseAuthException catch (e) {
       isLoading = false;
       notifyListeners();
-      return token;
+      throw Exception(e.message ?? "Login failed");
     } catch (e) {
       isLoading = false;
       notifyListeners();
-      throw Exception(e);
+      throw Exception("An unknown error occurred: $e");
     }
   }
 
-  void signup(String email, String password) async {
-    if (password.compareTo(confirmPasswordController.text) != 0) {
+  Future<void> signup(String email, String password) async {
+    if (password != confirmPasswordController.text) {
       throw Exception('Passwords do not match');
     }
     isLoading = true;
-    final _storage = await FlutterSecureStorage();
-    final url = Uri.parse(APIUrls.REGISTER);
     notifyListeners();
     try {
-      final response = await http.post(
-        url,
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
+      UserCredential cred = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-      token = jsonDecode(response.body)['token'];
-      await Future.wait([
-        _storage.write(key: 'token', value: token),
-        _storage.write(key: 'email', value: email),
-        _storage.write(key: 'password', value: password),
-      ]);
-      isLoading = false;
-      authState = true;
+
+      // Create user document in Firestore
+      if (cred.user != null) {
+        await _dbService.createUser(cred.user!.uid, email);
+      }
+
       isLoading = false;
       notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      isLoading = false;
+      notifyListeners();
+      throw Exception(e.message ?? "Registration failed");
     } catch (e) {
       isLoading = false;
       notifyListeners();
-      throw Exception(e);
+      throw Exception("An unknown error occurred: $e");
     }
-    isLoading = false;
-    notifyListeners();
   }
 
-  void signout() async {
+  Future<void> signout() async {
     try {
-      final _storage = await FlutterSecureStorage();
-      await _storage.deleteAll();
-      token = '';
-      authState = false;
-      notifyListeners();
+      await _firebaseAuth.signOut();
+      // Auth state listener will handle UI updates
+      emailController.clear();
+      passwordController.clear();
+      confirmPasswordController.clear();
     } catch (e) {
       throw Exception(e);
     }
