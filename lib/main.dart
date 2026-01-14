@@ -93,55 +93,48 @@ class AppPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<NavBar, ColorsProvider>(
       builder: (context, navBar, colorPro, _) {
-        return MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (context) => SettingsModel()),
-            ChangeNotifierProvider(create: (context) => GameProvider()),
-            ChangeNotifierProvider(create: (context) => ScratchProvider()),
-            ChangeNotifierProvider(create: (context) => CartProvider()),
-            ChangeNotifierProvider(create: (context) => LearnProvider()),
-          ],
-          child: Scaffold(
-            body: [
-              const Home(),
-              const CardScratch(),
-              const Learn()
-            ][navBar.idx],
-            bottomNavigationBar: NavigationBar(
-              backgroundColor: colorPro.getAppBarColor(),
-              selectedIndex: navBar.idx,
-              onDestinationSelected: (idx) => navBar.change(idx),
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-              destinations: [
-                NavigationDestination(
-                    icon: Icon(
-                      CupertinoIcons.home,
-                      size: navBar.idx == 0 ? 32 : 25,
-                      color: navBar.idx == 0
-                          ? colorPro.primaryColor()
-                          : colorPro.navBarIconActiveColor(),
-                    ),
-                    label: ""),
-                NavigationDestination(
-                    icon: Icon(
-                      CupertinoIcons.app,
-                      size: navBar.idx == 1 ? 32 : 25,
-                      color: navBar.idx == 1
-                          ? colorPro.primaryColor()
-                          : colorPro.navBarIconActiveColor(),
-                    ),
-                    label: ""),
-                NavigationDestination(
-                    icon: Icon(
-                      CupertinoIcons.eyeglasses,
-                      size: navBar.idx == 2 ? 32 : 25,
-                      color: navBar.idx == 2
-                          ? colorPro.primaryColor()
-                          : colorPro.navBarIconActiveColor(),
-                    ),
-                    label: ""),
-              ],
-            ),
+        // BUG FIX: Removed the redundant MultiProvider.
+        // The global one in main() already provides these.
+        return Scaffold(
+          body: [
+            const Home(),
+            const CardScratch(),
+            const Learn()
+          ][navBar.idx],
+          bottomNavigationBar: NavigationBar(
+            backgroundColor: colorPro.getAppBarColor(),
+            selectedIndex: navBar.idx,
+            onDestinationSelected: (idx) => navBar.change(idx),
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+            destinations: [
+              NavigationDestination(
+                  icon: Icon(
+                    CupertinoIcons.home,
+                    size: navBar.idx == 0 ? 32 : 25,
+                    color: navBar.idx == 0
+                        ? colorPro.primaryColor()
+                        : colorPro.navBarIconActiveColor(),
+                  ),
+                  label: ""),
+              NavigationDestination(
+                  icon: Icon(
+                    CupertinoIcons.app,
+                    size: navBar.idx == 1 ? 32 : 25,
+                    color: navBar.idx == 1
+                        ? colorPro.primaryColor()
+                        : colorPro.navBarIconActiveColor(),
+                  ),
+                  label: ""),
+              NavigationDestination(
+                  icon: Icon(
+                    CupertinoIcons.eyeglasses,
+                    size: navBar.idx == 2 ? 32 : 25,
+                    color: navBar.idx == 2
+                        ? colorPro.primaryColor()
+                        : colorPro.navBarIconActiveColor(),
+                  ),
+                  label: ""),
+            ],
           ),
         );
       },

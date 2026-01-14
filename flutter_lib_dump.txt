@@ -1,0 +1,4792 @@
+==============================================================================
+FILE: lib/app/home.dart
+==============================================================================
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:curve/services/responsive.dart';
+import 'package:curve/models/model.dart';
+import 'package:curve/routes/four_cards.dart';
+import 'package:curve/routes/keyword_obesseion.dart';
+import 'package:curve/routes/maze_grid.dart';
+import 'package:curve/routes/settings.dart';
+import 'package:curve/routes/truth_dare.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/mdi.dart';
+
+class Home extends StatelessWidget {
+  const Home({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Curves"),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: IconButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (ctx) => Settings(),
+                ),
+              ),
+              icon: Icon(CupertinoIcons.gear),
+            ),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: GridView.custom(
+          shrinkWrap: true, // Prevents the GridView from scrolling
+          physics: NeverScrollableScrollPhysics(), // Disables scrolling
+          gridDelegate: SliverWovenGridDelegate.count(
+            crossAxisCount: 2,
+            mainAxisSpacing: 0.5,
+            crossAxisSpacing: 0.5,
+            pattern: [
+              WovenGridTile(
+                5 / 7,
+                crossAxisRatio: Responsive.isMobile(context) ? 0.95 : 0.2,
+                alignment: AlignmentDirectional.topEnd,
+              ),
+              WovenGridTile(0.8,
+                  crossAxisRatio: Responsive.isMobile(context) ? 1 : 0.2)
+            ],
+          ),
+          childrenDelegate: SliverChildBuilderDelegate(
+            childCount: 4,
+            (context, index) {
+              List<AppCardsHome> cards = [
+                AppCardsHome(
+                  cardColor: Colors.red.shade900,
+                  title: "4 Cards",
+                  textColor: Colors.red.shade50,
+                  extraIcon: Mdi.cards_playing,
+                  iconColor: Colors.red.shade50,
+                ),
+                AppCardsHome(
+                    cardColor: Colors.blueGrey.shade900,
+                    title: "Keyword Obsession",
+                    textColor: Colors.blueGrey.shade50,
+                    iconAdd: CupertinoIcons.textformat,
+                    iconColor: Colors.blueGrey.shade50),
+                AppCardsHome(
+                  cardColor: Colors.pink.shade900,
+                  title: "Truth or Dare",
+                  textColor: Colors.pink.shade50,
+                  iconColor: Colors.pink.shade50,
+                  iconAdd: CupertinoIcons.hand_raised_fill,
+                ),
+                AppCardsHome(
+                  cardColor: Colors.purple.shade900,
+                  title: "Intimacy Maze",
+                  textColor: Colors.purple.shade50,
+                  iconColor: Colors.purple.shade50,
+                  iconAdd: CupertinoIcons.grid,
+                ),
+              ];
+              return GestureDetector(
+                onTap: () {
+                  if (cards[index].title == "Intimacy Maze") {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (ctx) => MazeGrid()));
+                  } else if (cards[index].title == "Truth or Dare") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (ctx) => TruthDareCardPage(),
+                      ),
+                    );
+                  } else if (cards[index].title == "Keyword Obsession") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (ctx) => KeywordObesseion(),
+                      ),
+                    );
+                  } else if (cards[index].title == "4 Cards") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (ctx) => FourCards(),
+                      ),
+                    );
+                  }
+                },
+                child: Card(
+                  elevation: 12,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: cards[index].cardColor,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        cards[index].extraIcon != ""
+                            ? Iconify(
+                                cards[index].extraIcon,
+                                size: 95,
+                                color: cards[index].iconColor,
+                              )
+                            : Icon(cards[index].iconAdd,
+                                size: 95, color: cards[index].iconColor),
+                        Align(
+                          alignment: Alignment.center,
+                          child: AutoSizeText(
+                            cards[index].title,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge!
+                                .copyWith(color: cards[index].textColor),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/app/login.dart
+==============================================================================
+import 'package:flutter/material.dart';
+
+class Login extends StatelessWidget {
+  const Login({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold();
+  }
+}
+
+==============================================================================
+FILE: lib/app/card_scratch.dart
+==============================================================================
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/scratch_provider.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
+import 'package:scratcher/scratcher.dart';
+
+class CardScratch extends StatelessWidget {
+  const CardScratch({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final GlobalKey<ScratcherState> key = GlobalKey();
+
+    return Consumer<ScratchProvider>(builder: (context, scPro, _) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Odyssey"),
+        ),
+        body: LayoutBuilder(builder: (context, constraint) {
+          final size = constraint.maxWidth * 0.9;
+          return Stack(
+            children: [
+              Center(
+                child: ClipRRect(
+                  
+                  borderRadius: BorderRadius.circular(20),
+                  child: Consumer<ColorsProvider>(
+                    builder: (context, colorPro, _) {
+                      return Scratcher(
+                        key: key,
+                        color: scPro.thresholdReached
+                            ? Colors.transparent
+                            : colorPro.scratchCard(),
+                        threshold: 45,
+                        brushSize: 65,
+                        onScratchEnd: () {},
+                        onThreshold: () => scPro.setThresholdReached(),
+                        onScratchUpdate: () {},
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.black,
+                            borderRadius: BorderRadius.circular(20),
+                            image: DecorationImage(
+                              image: CachedNetworkImageProvider(
+                                  "https://i.pinimg.com/736x/87/4a/74/874a7481bbe0cab8f51827722dde96ec.jpg"),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          width: size,
+                          height: size,
+                        ),
+                      );
+                    }
+                  ),
+                ),
+              ),
+              (scPro.thresholdReached && (scPro.animationEnded == false))
+                  ? Positioned(
+                      bottom: 100,
+                      right: 150,
+                      child: SizedBox(
+                        height: 200,
+                        width: 400,
+                        child: Lottie.asset("assets/animation/custom_made.json",
+                            repeat: false,
+                            width: 400, onLoaded: (composition) async {
+                          scPro.endAnimation(composition);
+                        }),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+              (scPro.thresholdReached && (scPro.animationEnded == false))
+                  ? Positioned(
+                      bottom: 2,
+                      child: Lottie.asset("assets/animation/go_blue.json",
+                          repeat: false),
+                    )
+                  : const SizedBox.shrink(),
+              scPro.thresholdReached
+                  ? Padding(
+                      padding: const EdgeInsets.all(18.0),
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: TextButton(
+                          onPressed: () {},
+                          child: Text("Know More"),
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink()
+            ],
+          );
+        }),
+        floatingActionButton: scPro.thresholdReached
+            ? FloatingActionButton(
+                child: Icon(
+                  CupertinoIcons.refresh,
+                ),
+                onPressed: () {
+                  key.currentState?.reset();
+                  scPro.resetProgress();
+                },
+              )
+            : null,
+      );
+    });
+  }
+}
+
+
+==============================================================================
+FILE: lib/app/learn.dart
+==============================================================================
+import 'package:curve/routes/learn_details.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/learn_provider.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:provider/provider.dart';
+
+class Learn extends StatelessWidget {
+  const Learn({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<LearnProvider, ColorsProvider>(
+      builder: (context, learn, colorx, _) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text("Learn"),
+          ),
+          body: ListView.builder(
+            itemCount: learn.articles.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colorx.placeHolders(),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          learn.articles[index].title,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineLarge!
+                              .copyWith(
+                                color: colorx.navBarIconActiveColor(),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Markdown(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            data: learn.articles[index].introduction),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              radius: 12,
+                              child: Center(
+                                child: Text(
+                                  learn.articles[index].sectionsCount
+                                      .toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall!
+                                      .copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ),
+                            ),
+                            CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (ctx) => LearnDetail(
+                                            learn.articles[index],
+                                          ))),
+                              child: Text(
+                                "Learn More",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium!
+                                    .copyWith(
+                                      color: colorx.seedColorColor(),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/auth/auth.dart
+==============================================================================
+import 'package:curve/services/db.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart'; // For kIsWeb
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+class AuthProvider extends ChangeNotifier {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final DatabaseService _dbService = DatabaseService();
+  
+  // FIX: Use .instance singleton (v7 Requirement)
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  bool _isGoogleSignInInitialized = false;
+
+  AuthProvider() {
+    initAuth();
+  }
+
+  bool isLogin = true;
+  bool isLoading = false;
+  bool authState = false;
+  bool authIsLoading = true;
+  String? userId;
+
+  final formKey = GlobalKey<FormState>();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  void initAuth() {
+    // 1. Firebase Auth Listener
+    _firebaseAuth.authStateChanges().listen((User? user) {
+      if (user != null) {
+        authState = true;
+        userId = user.uid;
+      } else {
+        authState = false;
+        userId = null;
+      }
+      authIsLoading = false;
+      notifyListeners();
+    });
+
+    // 2. Initialize Google Sign In (Async in v7)
+    _ensureGoogleSignInInitialized();
+  }
+
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (!_isGoogleSignInInitialized) {
+      try {
+        await _googleSignIn.initialize();
+        _isGoogleSignInInitialized = true;
+
+        // WEB SPECIFIC: Check for existing session (Silent Auth)
+        if (kIsWeb) {
+          // Because v7 on Web manages session via the iframe/popup, 
+          // we check if we can restore authentication silently.
+          _checkWebSession();
+        }
+      } catch (e) {
+        debugPrint("Google Sign-In initialization failed: $e");
+      }
+    }
+  }
+
+  Future<void> _checkWebSession() async {
+    try {
+      final result = await _googleSignIn.attemptLightweightAuthentication();
+      if (result != null) {
+        await _finalizeGoogleSignIn(result);
+      }
+    } catch (e) {
+      // Silent failure is expected if no user is signed in
+      debugPrint("Web silent auth check: $e");
+    }
+  }
+
+  /// Triggered by Mobile Custom Button
+  Future<void> signInWithGoogle() async {
+    // On Web, the GoogleButton widget (google_button.dart) handles the flow
+    if (kIsWeb) return; 
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      await _ensureGoogleSignInInitialized();
+      
+      // v7: authenticate() is the new method
+      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+      
+      await _finalizeGoogleSignIn(googleUser);
+      
+      isLoading = false;
+      notifyListeners();
+    } on GoogleSignInException catch (e) {
+      isLoading = false;
+      notifyListeners();
+      // v7 throws 'canceled' if closed by user
+      if (e.code != 'canceled') {
+         debugPrint("Google Auth Error: ${e.code}");
+         throw Exception("Google Sign In failed: ${e.toString()}");
+      }
+    } catch (e) {
+      isLoading = false;
+      notifyListeners();
+      throw Exception("An unknown error occurred: $e");
+    }
+  }
+
+  /// Exchange Google Account for Firebase Credentials
+  Future<void> _finalizeGoogleSignIn(GoogleSignInAccount googleUser) async {
+      try {
+        // 1. Get ID Token (Synchronous in v7)
+        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+        // 2. Get Access Token (Via authorizationClient in v7)
+        final authClient = _googleSignIn.authorizationClient;
+        // Request scopes again to get the accessToken
+        final authorization = await authClient.authorizationForScopes(['email']);
+        
+        // 3. Create Firebase Credential
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: authorization?.accessToken, 
+          idToken: googleAuth.idToken,
+        );
+
+        // 4. Sign in to Firebase
+        UserCredential userCredential =
+            await _firebaseAuth.signInWithCredential(credential);
+
+        // 5. Save to Firestore
+        if (userCredential.user != null) {
+          await _dbService.createUser(
+            userCredential.user!.uid,
+            userCredential.user!.email ?? "google_user",
+          );
+        }
+      } catch (e) {
+        debugPrint("Error finalizing sign in: $e");
+        // Do not throw here to keep UI alive, maybe show toast
+      }
+  }
+
+  // --- Email/Password Methods ---
+  Future<void> login(String email, String password) async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      UserCredential cred = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      if (cred.user != null) {
+        await _dbService.createUser(cred.user!.uid, email);
+      }
+      isLoading = false;
+      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      isLoading = false;
+      notifyListeners();
+      throw Exception(e.message ?? "Login failed");
+    }
+  }
+
+  Future<void> signup(String email, String password) async {
+    if (password != confirmPasswordController.text) {
+      throw Exception('Passwords do not match');
+    }
+    isLoading = true;
+    notifyListeners();
+    try {
+      UserCredential cred = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      if (cred.user != null) {
+        await _dbService.createUser(cred.user!.uid, email);
+      }
+      isLoading = false;
+      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      isLoading = false;
+      notifyListeners();
+      throw Exception(e.message ?? "Registration failed");
+    }
+  }
+
+  Future<void> signout() async {
+    try {
+      await Future.wait([
+        _firebaseAuth.signOut(),
+        if (_isGoogleSignInInitialized) _googleSignIn.signOut(),
+      ]);
+      emailController.clear();
+      passwordController.clear();
+      confirmPasswordController.clear();
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  void toggleAuthMode() {
+    isLogin = !isLogin;
+    notifyListeners();
+  }
+}
+
+==============================================================================
+FILE: lib/auth/animated_screen.dart
+==============================================================================
+import 'dart:math';
+import 'package:curve/services/colors_provider.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+
+class AnimatedBackground extends StatefulWidget {
+  const AnimatedBackground({super.key});
+
+  @override
+  State<AnimatedBackground> createState() => _AnimatedBackgroundState();
+}
+
+class _AnimatedBackgroundState extends State<AnimatedBackground>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation1;
+  late Animation<double> _animation2;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat(reverse: true);
+
+    _animation1 = Tween<double>(begin: 0, end: 2 * pi).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    _animation2 = Tween<double>(begin: 2 * pi, end: 0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Consumer<ColorsProvider>(builder: (context, colorProvider, _) {
+          return CustomPaint(
+            painter: _GradientPainter(_animation1.value, _animation2.value,
+                colorProvider.getGradients()),
+            child: Container(),
+          );
+        });
+      },
+    );
+  }
+}
+
+class _GradientPainter extends CustomPainter {
+  final double rotation1;
+  final double rotation2;
+  final List<List<Color>> gradient;
+
+  _GradientPainter(this.rotation1, this.rotation2, this.gradient);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+
+    // Two gradients that rotate in opposite directions
+    final gradient1 = RadialGradient(
+      center: const Alignment(0.2, 0.2),
+      radius: 1.2,
+      colors: gradient[0],
+      stops: const [0.0, 2.0],
+      transform: GradientRotation(rotation1),
+    );
+
+    final gradient2 = RadialGradient(
+      center: const Alignment(0.8, 0.8),
+      radius: 1.3,
+      colors: gradient[1],
+      stops: const [0.0, 1.0],
+      transform: GradientRotation(rotation2),
+    );
+
+    // Paint the first gradient
+    final paint1 = Paint()..shader = gradient1.createShader(rect);
+    canvas.drawRect(rect, paint1);
+
+    // Blend the second gradient using an overlay approach
+    final paint2 = Paint()
+      ..blendMode = BlendMode.overlay
+      ..shader = gradient2.createShader(rect);
+    canvas.drawRect(rect, paint2);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+
+==============================================================================
+FILE: lib/auth/google_button.dart
+==============================================================================
+import 'package:curve/auth/auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:google_sign_in_web/google_sign_in_web.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/bi.dart';
+import 'package:provider/provider.dart';
+
+// Import platform interface to access GSIButtonConfiguration and renderButton
+import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
+
+class GoogleButton extends StatelessWidget {
+  const GoogleButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (kIsWeb) {
+      // ------------------------------------
+      // WEB: Use the official Rendered Button
+      // ------------------------------------
+      // The renderButton method returns a Widget that displays the GSI button
+      return Container(
+        margin: const EdgeInsets.only(top: 10),
+        child: (GoogleSignInPlatform.instance as dynamic).renderButton(
+          configuration: GSIButtonConfiguration(
+            type: GSIButtonType.standard,
+            theme: GSIButtonTheme.outline,
+            size: GSIButtonSize.large,
+            shape: GSIButtonShape.pill,
+          ),
+        ),
+      );
+    } else {
+      // ------------------------------------
+      // MOBILE: Render Custom Cupertino Button
+      // ------------------------------------
+      return CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () async {
+          try {
+            await Provider.of<AuthProvider>(context, listen: false)
+                .signInWithGoogle();
+          } catch (e) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Google Sign In Error"),
+                  content: Text(e.toString().replaceAll("Exception: ", "")),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text("OK"),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                )
+              ]),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Iconify(Bi.google, color: Colors.black),
+              SizedBox(width: 8),
+              Text(
+                "Sign in with Google",
+                style: TextStyle(color: Colors.black, fontSize: 14),
+              )
+            ],
+          ),
+        ),
+      );
+    }
+  }
+}
+
+
+==============================================================================
+FILE: lib/auth/auth_screen.dart
+==============================================================================
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/auth/animated_screen.dart';
+import 'package:curve/auth/auth.dart';
+import 'package:curve/auth/google_button.dart'; // Import the button widget
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class AuthScreen extends StatelessWidget {
+  const AuthScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          const AnimatedBackground(),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: Form(
+                            key: authProvider.formKey,
+                            child: Column(
+                              children: [
+                                Text(
+                                  "Curves",
+                                  style:
+                                      Theme.of(context).textTheme.displayLarge,
+                                ),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.1),
+                                TextFormField(
+                                  controller: authProvider.emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  decoration: InputDecoration(
+                                    labelText: "Email",
+                                    labelStyle:
+                                        Theme.of(context).textTheme.labelSmall,
+                                  ),
+                                  validator: (value) {
+                                    if (value == null ||
+                                        value.trim().isEmpty ||
+                                        !value.contains('@')) {
+                                      return 'Please enter a valid email';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 1),
+                                TextFormField(
+                                  controller: authProvider.passwordController,
+                                  obscureText: true,
+                                  decoration: InputDecoration(
+                                    labelText: "Password",
+                                    labelStyle:
+                                        Theme.of(context).textTheme.labelSmall,
+                                  ),
+                                  validator: (value) {
+                                    if (value == null ||
+                                        value.trim().length < 6) {
+                                      return 'Password must be at least 6 characters long';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 1),
+                                if (!authProvider.isLogin)
+                                  AnimatedSize(
+                                    curve: Curves.easeInOut,
+                                    duration:
+                                        const Duration(milliseconds: 1500),
+                                    child: TextFormField(
+                                      controller: authProvider
+                                          .confirmPasswordController,
+                                      obscureText: true,
+                                      decoration: InputDecoration(
+                                        labelText: "Confirm Password",
+                                        labelStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall,
+                                      ),
+                                      validator: (value) {
+                                        if (value !=
+                                            authProvider
+                                                .passwordController.text) {
+                                          return 'Passwords do not match';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                const SizedBox(height: 13),
+                                authProvider.isLoading
+                                    ? Consumer<ColorsProvider>(
+                                        builder: (context, color, _) {
+                                        return CircularProgressIndicator(
+                                          color: color.lodingColor(),
+                                        );
+                                      })
+                                    : Column(
+                                        children: [
+                                          CupertinoButton(
+                                            onPressed: () async {
+                                              if (!authProvider
+                                                  .formKey.currentState!
+                                                  .validate()) {
+                                                return;
+                                              }
+                                              try {
+                                                if (authProvider.isLogin) {
+                                                  authProvider.login(
+                                                    authProvider
+                                                        .emailController.text
+                                                        .trim(),
+                                                    authProvider
+                                                        .passwordController.text
+                                                        .trim(),
+                                                  );
+                                                } else {
+                                                  authProvider.signup(
+                                                    authProvider
+                                                        .emailController.text
+                                                        .trim(),
+                                                    authProvider
+                                                        .passwordController.text
+                                                        .trim(),
+                                                  );
+                                                }
+                                              } catch (e) {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title:
+                                                          const Text("Error"),
+                                                      content: Text(e
+                                                          .toString()
+                                                          .replaceAll(
+                                                              "Exception: ",
+                                                              "")),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          child:
+                                                              const Text("OK"),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              }
+                                            },
+                                            child: Text(
+                                              authProvider.isLogin
+                                                  ? 'LOGIN'
+                                                  : 'SIGN UP',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          // GOOGLE BUTTON (Handles Web & Mobile)
+                                          const GoogleButton(),
+                                        ],
+                                      ),
+                                TextButton(
+                                  onPressed: () {
+                                    authProvider.toggleAuthMode();
+                                  },
+                                  child: Text(
+                                    authProvider.isLogin
+                                        ? "Don't have an account? Sign Up"
+                                        : "Already have an account? Login",
+                                    style:
+                                        Theme.of(context).textTheme.labelSmall,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/auth/wave_clipper.dart
+==============================================================================
+import 'package:flutter/material.dart';
+
+class WaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    // Creates a wave shape at the bottom of the container
+    final path = Path();
+    path.lineTo(0, size.height - 40);
+
+    // First control point and end point
+    var firstControlPoint = Offset(size.width / 4, size.height);
+    var firstEndPoint = Offset(size.width / 2, size.height - 40);
+
+    // Quadratic bezier curve
+    path.quadraticBezierTo(
+      firstControlPoint.dx,
+      firstControlPoint.dy,
+      firstEndPoint.dx,
+      firstEndPoint.dy,
+    );
+
+    // Second control point and end point
+    var secondControlPoint = Offset(size.width * 3 / 4, size.height - 80);
+    var secondEndPoint = Offset(size.width, size.height - 40);
+
+    // Quadratic bezier curve
+    path.quadraticBezierTo(
+      secondControlPoint.dx,
+      secondControlPoint.dy,
+      secondEndPoint.dx,
+      secondEndPoint.dy,
+    );
+
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+==============================================================================
+FILE: lib/firebase_options.dart
+==============================================================================
+// File generated by FlutterFire CLI.
+// ignore_for_file: type=lint
+import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
+/// Default [FirebaseOptions] for use with your Firebase apps.
+///
+/// Example:
+/// ```dart
+/// import 'firebase_options.dart';
+/// // ...
+/// await Firebase.initializeApp(
+///   options: DefaultFirebaseOptions.currentPlatform,
+/// );
+/// ```
+class DefaultFirebaseOptions {
+  static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      return web;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
+      case TargetPlatform.iOS:
+        return ios;
+      case TargetPlatform.macOS:
+        return macos;
+      case TargetPlatform.windows:
+        return windows;
+      case TargetPlatform.linux:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for linux - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
+      default:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions are not supported for this platform.',
+        );
+    }
+  }
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDHOs8HNG4GIGF3Td-Vw4WAWBjURmj-c3o',
+    appId: '1:828216880386:web:1e6644384f07f5b92fe61b',
+    messagingSenderId: '828216880386',
+    projectId: 'evesdrops-46b4b',
+    authDomain: 'evesdrops-46b4b.firebaseapp.com',
+    storageBucket: 'evesdrops-46b4b.firebasestorage.app',
+    measurementId: 'G-R3EXQ615E4',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyDdceP3x7glrNq46CAQNzYdcCicNMTfC70',
+    appId: '1:828216880386:android:cd606e98e9ceffaf2fe61b',
+    messagingSenderId: '828216880386',
+    projectId: 'evesdrops-46b4b',
+    storageBucket: 'evesdrops-46b4b.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyCxUbdiUthWmAGpA_sBk92mNAsUz3DLL-Q',
+    appId: '1:828216880386:ios:4273c3a23104fc8b2fe61b',
+    messagingSenderId: '828216880386',
+    projectId: 'evesdrops-46b4b',
+    storageBucket: 'evesdrops-46b4b.firebasestorage.app',
+    iosClientId: '828216880386-llqkcc3ll3hm49ett5a0aoe62s5r5vt6.apps.googleusercontent.com',
+    iosBundleId: 'com.example.curve',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyCxUbdiUthWmAGpA_sBk92mNAsUz3DLL-Q',
+    appId: '1:828216880386:ios:4273c3a23104fc8b2fe61b',
+    messagingSenderId: '828216880386',
+    projectId: 'evesdrops-46b4b',
+    storageBucket: 'evesdrops-46b4b.firebasestorage.app',
+    iosClientId: '828216880386-llqkcc3ll3hm49ett5a0aoe62s5r5vt6.apps.googleusercontent.com',
+    iosBundleId: 'com.example.curve',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyDHOs8HNG4GIGF3Td-Vw4WAWBjURmj-c3o',
+    appId: '1:828216880386:web:67a5f0d05130d7f12fe61b',
+    messagingSenderId: '828216880386',
+    projectId: 'evesdrops-46b4b',
+    authDomain: 'evesdrops-46b4b.firebaseapp.com',
+    storageBucket: 'evesdrops-46b4b.firebasestorage.app',
+    measurementId: 'G-0F4RX8WC1P',
+  );
+}
+
+
+==============================================================================
+FILE: lib/models/learn_model.dart
+==============================================================================
+class Article {
+  final int id;
+  final String title;
+  final String introduction;
+  final String conclusion;
+  final int sectionsCount;
+  List<SectionsReadings> sections = [];
+
+  // Constructor with a default value for sections
+  Article({
+    required this.id,
+    required this.title,
+    required this.introduction,
+    required this.conclusion,
+    required this.sectionsCount,
+    this.sections = const [],
+  });
+
+  // Factory constructor to create an Article instance from a JSON object
+  factory Article.fromJson(Map<String, dynamic> json) {
+    return Article(
+      id: json['id'],
+      title: json['title'],
+      introduction: json['introduction'],
+      conclusion: json['conclusion'],
+      sectionsCount: json['sections_count'],
+    );
+  }
+
+  // Method to convert an Article instance to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'introduction': introduction,
+      'conclusion': conclusion,
+      'sections_count': sectionsCount,
+    };
+  }
+}
+
+class SectionsReadings {
+  final int id;
+  final String heading;
+  final String content;
+  final int articleId;
+
+  SectionsReadings({
+    required this.id,
+    required this.heading,
+    required this.content,
+    required this.articleId,
+  });
+
+  factory SectionsReadings.fromJson(Map<String, dynamic> json) {
+    return SectionsReadings(
+      id: json['id'] as int,
+      heading: json['heading'] as String,
+      content: json['content'] as String,
+      articleId: json['article_id'] as int,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'heading': heading,
+      'content': content,
+      'article_id': articleId,
+    };
+  }
+}
+
+
+==============================================================================
+FILE: lib/models/four_card_model.dart
+==============================================================================
+import 'package:uuid/uuid.dart';
+import 'dart:math' as math;
+
+class FourCardModel {
+  int cardNumber;
+  String cardId;
+
+  FourCardModel({int? cardNumber, String? cardId})
+      : cardNumber = cardNumber ??
+            math.Random().nextInt(4) + 1, // Use provided cardNumber or random
+        cardId =
+            cardId ?? const Uuid().v4(); // Generate unique UUID if not provided
+}
+
+
+==============================================================================
+FILE: lib/models/movie_model.dart
+==============================================================================
+class Movie {
+  final String title;
+  final String year;
+  final String imdbID;
+  final String type;
+  final String poster;
+
+  // Optional fields
+  final String? rated;
+  final String? released;
+  final String? runtime;
+  final String? genre;
+  final String? director;
+  final String? writer;
+  final String? actors;
+  final String? plot;
+  final String? language;
+  final String? country;
+  final String? awards;
+  final List<Map<String, String>>? ratings;
+  final String? metascore;
+  final String? imdbRating;
+  final String? imdbVotes;
+  final String? dvd;
+  final String? boxOffice;
+  final String? production;
+  final String? website;
+
+  Movie({
+    required this.title,
+    required this.year,
+    required this.imdbID,
+    required this.type,
+    required this.poster,
+    this.rated,
+    this.released,
+    this.runtime,
+    this.genre,
+    this.director,
+    this.writer,
+    this.actors,
+    this.plot,
+    this.language,
+    this.country,
+    this.awards,
+    this.ratings,
+    this.metascore,
+    this.imdbRating,
+    this.imdbVotes,
+    this.dvd,
+    this.boxOffice,
+    this.production,
+    this.website,
+  });
+
+  factory Movie.fromJson(Map<String, dynamic> json) {
+    return Movie(
+      title: json['Title'],
+      year: json['Year'],
+      imdbID: json['imdbID'],
+      type: json['Type'],
+      poster: json['Poster'],
+      rated: json['Rated'],
+      released: json['Released'],
+      runtime: json['Runtime'],
+      genre: json['Genre'],
+      director: json['Director'],
+      writer: json['Writer'],
+      actors: json['Actors'],
+      plot: json['Plot'],
+      language: json['Language'],
+      country: json['Country'],
+      awards: json['Awards'],
+      ratings: (json['Ratings'] as List?)?.map((e) => Map<String, String>.from(e)).toList(),
+      metascore: json['Metascore'],
+      imdbRating: json['imdbRating'],
+      imdbVotes: json['imdbVotes'],
+      dvd: json['DVD'],
+      boxOffice: json['BoxOffice'],
+      production: json['Production'],
+      website: json['Website'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Title': title,
+      'Year': year,
+      'imdbID': imdbID,
+      'Type': type,
+      'Poster': poster,
+      if (rated != null) 'Rated': rated,
+      if (released != null) 'Released': released,
+      if (runtime != null) 'Runtime': runtime,
+      if (genre != null) 'Genre': genre,
+      if (director != null) 'Director': director,
+      if (writer != null) 'Writer': writer,
+      if (actors != null) 'Actors': actors,
+      if (plot != null) 'Plot': plot,
+      if (language != null) 'Language': language,
+      if (country != null) 'Country': country,
+      if (awards != null) 'Awards': awards,
+      if (ratings != null) 'Ratings': ratings,
+      if (metascore != null) 'Metascore': metascore,
+      if (imdbRating != null) 'imdbRating': imdbRating,
+      if (imdbVotes != null) 'imdbVotes': imdbVotes,
+      if (dvd != null) 'DVD': dvd,
+      if (boxOffice != null) 'BoxOffice': boxOffice,
+      if (production != null) 'Production': production,
+      if (website != null) 'Website': website,
+    };
+  }
+}
+
+
+==============================================================================
+FILE: lib/models/model.dart
+==============================================================================
+import 'package:flutter/cupertino.dart';
+
+class AppCardsHome {
+  final Color cardColor;
+  final String title;
+  final Color textColor;
+  IconData iconAdd;
+  String extraIcon;
+  Color iconColor;
+
+  AppCardsHome({
+    required this.cardColor,
+    required this.title,
+    required this.textColor,
+    this.iconAdd = CupertinoIcons.add_circled,
+    this.iconColor = CupertinoColors.white,
+    this.extraIcon = "",
+  });
+}
+
+
+==============================================================================
+FILE: lib/main.dart
+==============================================================================
+import 'package:curve/services/cart_provider.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/gird_provider.dart';
+import 'package:curve/services/learn_provider.dart';
+import 'package:curve/services/scratch_provider.dart';
+import 'package:curve/app/home.dart';
+import 'package:curve/services/state.dart';
+import 'package:curve/services/settings_model.dart';
+import 'package:curve/app/card_scratch.dart';
+import 'package:curve/app/learn.dart';
+import 'package:curve/auth/auth.dart';
+import 'package:curve/auth/auth_screen.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => NavBar()),
+        ChangeNotifierProvider(create: (_) => ColorsProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsModel()),
+        ChangeNotifierProvider(create: (_) => GameProvider()),
+        ChangeNotifierProvider(create: (_) => ScratchProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => LearnProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<ColorsProvider, AuthProvider>(
+        builder: (context, colorProvider, auth, _) {
+      return MaterialApp(
+        title: 'eavesdrops',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          textTheme: GoogleFonts.ptSansTextTheme().apply(
+            bodyColor: colorProvider.navBarIconActiveColor(),
+            displayColor: colorProvider.navBarIconActiveColor(),
+          ),
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+              backgroundColor: colorProvider.playerCell("s")),
+          appBarTheme: AppBarTheme(color: colorProvider.getAppBarColor()),
+          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+              backgroundColor: colorProvider.getAppBarColor()),
+          scaffoldBackgroundColor: colorProvider.getScaffoldColor(),
+          navigationBarTheme: NavigationBarThemeData(
+              indicatorShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              indicatorColor: Colors.transparent),
+          colorScheme: ColorScheme.fromSeed(
+              primary: colorProvider.primaryColor(),
+              seedColor: colorProvider.seedColorColor(),
+              brightness: colorProvider.getBrightness()),
+          useMaterial3: true,
+        ),
+        home: auth.authIsLoading
+            ? const Scaffold(body: Center(child: CupertinoActivityIndicator()))
+            : auth.authState
+                ? const AppPage()
+                : const AuthScreen(),
+      );
+    });
+  }
+}
+
+class AppPage extends StatelessWidget {
+  const AppPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<NavBar, ColorsProvider>(
+      builder: (context, navBar, colorPro, _) {
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (context) => SettingsModel()),
+            ChangeNotifierProvider(create: (context) => GameProvider()),
+            ChangeNotifierProvider(create: (context) => ScratchProvider()),
+            ChangeNotifierProvider(create: (context) => CartProvider()),
+            ChangeNotifierProvider(create: (context) => LearnProvider()),
+          ],
+          child: Scaffold(
+            body: [
+              const Home(),
+              const CardScratch(),
+              const Learn()
+            ][navBar.idx],
+            bottomNavigationBar: NavigationBar(
+              backgroundColor: colorPro.getAppBarColor(),
+              selectedIndex: navBar.idx,
+              onDestinationSelected: (idx) => navBar.change(idx),
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+              destinations: [
+                NavigationDestination(
+                    icon: Icon(
+                      CupertinoIcons.home,
+                      size: navBar.idx == 0 ? 32 : 25,
+                      color: navBar.idx == 0
+                          ? colorPro.primaryColor()
+                          : colorPro.navBarIconActiveColor(),
+                    ),
+                    label: ""),
+                NavigationDestination(
+                    icon: Icon(
+                      CupertinoIcons.app,
+                      size: navBar.idx == 1 ? 32 : 25,
+                      color: navBar.idx == 1
+                          ? colorPro.primaryColor()
+                          : colorPro.navBarIconActiveColor(),
+                    ),
+                    label: ""),
+                NavigationDestination(
+                    icon: Icon(
+                      CupertinoIcons.eyeglasses,
+                      size: navBar.idx == 2 ? 32 : 25,
+                      color: navBar.idx == 2
+                          ? colorPro.primaryColor()
+                          : colorPro.navBarIconActiveColor(),
+                    ),
+                    label: ""),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/logs/4_cards_task.dart
+==============================================================================
+
+Map<int, List<String>> combinedTasks = {
+  1: [
+    // Sun
+    // Set 1
+    'Explore your partner’s body with light kisses.',
+    'Use a feather to gently stroke your partner’s skin.',
+    'Describe a fantasy you have about exploring nature with your partner.',
+    'Give your partner a hand massage using oil or lotion.',
+    'Tease your partner’s lips with your fingers.',
+    'Draw an imaginary shape on your partner’s body with your breath.',
+    'Guide each other to a comfortable position using only touch.',
+    'Use a scented lotion or oil to massage your partner\'s shoulders.',
+    'Ask your partner what makes them feel alive and full of light.',
+    'Slowly remove one item of clothing from your partner using your teeth.',
+    'Make your partner close their eyes and use a touch or a kiss to guess a spot on the body',
+    'Move your hands gently on your partner’s skin and see their reaction.',
+    'Have your partner choose a music to put on while you are enjoying each other\'s touch.',
+    //Set 2
+    'Use a silk scarf to trace patterns on your partner\'s skin.',
+    'Massage your partner’s feet using your hands and mouth.',
+    'Tease your partner with a small ice cube on their neck and back.',
+    'Explore a new part of your partner’s body with a light touch.',
+    'Describe a sensual experience in nature with your partner.',
+    'Explore your partner’s skin with a light and playful bite.',
+    'Share a favorite summer memory with your partner and then recreate it.',
+    'Let your partner guide you through a room using only touch and smell.',
+    'Guide your partner using a feather and watch where they want you to touch them.',
+    'Touch yourself in a sensual way and ask your partner to describe what they are seeing.',
+    //Set 3
+    'Use warm oil to draw patterns on your partner’s skin.',
+    'Use a blindfold and have your partner lead you through a dance.',
+    'Play with your partner’s hair and explore the textures with your mouth and hands.',
+    'Let your partner explore a part of your body that you do not usually enjoy.',
+    'Let your partner create a sensual trail of kisses in the path that they choose.',
+    'Explore a new position with your partner and allow them to guide you.',
+    'Have your partner describe your body as if you were a work of art.',
+    'Guide each other through a blind taste test and describe your sensations.',
+    'Use your breath to caress your partner’s skin.',
+    'Use water, a feather or ice to describe a line in your partner’s body.',
+    'Pick a movie or series that you both like and have a sensual experience while watching it.',
+    'Have your partner choose a piece of clothing and undress in front of you using it.',
+    'Create a playful scenario where you both play and explore your bodies.',
+    'Have a competition to see who is the best at seducing, with touch and words.',
+    //Set 4
+    'Use your breath to explore your partner’s body.',
+    'Let your partner guide you with their hands and mouth.',
+    'Use a scented candle to explore each other’s bodies.',
+    'Explore your partner’s body using different textures.',
+    'Have your partner use their voice and your body to explore erogenous zones.',
+    'Use a soft scarf to explore your partner’s skin, tickling them gently.',
+    'Share what makes you feel confident with your partner.',
+    'Touch your partner and ask them to tell you what are they feeling.',
+    'Describe what you like the most about your partner’s body.',
+    'Use slow movements and guide your partner to explore you.',
+    'Have your partner explore your back with a sensual massage.',
+    'Have your partner tell you what part of their body is the most sensitive to touch.',
+    'Share what you like to do when you enjoy your own body.',
+    'Describe how your body feels when you are with your partner.',
+    'Let your partner design a way for you to show them how much you desire them.',
+  ],
+  2: [
+    // Lover
+    // Set 1
+    'Whisper a sweet compliment.',
+    'Give a gentle kiss on the forehead.',
+    'Hold your partner’s hand and describe your favorite thing about them.',
+    'Share a loving memory you have of your partner and cuddle.',
+    'Tell each other what you cherish the most about your relationship.',
+    // Set 2
+    'Share your favorite memory of a sensual moment with your partner.',
+    'Hold each other close and sway to an imaginary rhythm.',
+    'Give a soft kiss on your partner’s heart while looking into their eyes.',
+    'Compliment your partner\'s features that you find most attractive.',
+    'Whisper a silly and playful secret into your partner\'s ear.',
+    'Describe how you feel when your partner smiles at you.',
+    'Hold your partner’s hands and breathe in and out together',
+    'Tell each other your fears and your dreams.',
+    'Offer a gentle touch on your partner’s face and tell them how you cherish them.',
+    'Share a moment of vulnerability with your partner.',
+    'Give your partner a soft kiss and express a shared wish.',
+    'Tell your partner your favorite thing that you’ve learned from them.',
+    'Let your partner chose a nickname for you and they can use it while you are playing.',
+    'Have a slow dance with your partner in the bedroom, while enjoying the physical contact.',
+    'Tell your partner something that you find funny about them while you cuddle.',
+    // Set 3
+    'Write a love note on your partner’s back using your finger.',
+    'Share a dream you have about your future with your partner.',
+    'Use a soft kiss to express how much you appreciate your partner.',
+    'Tell your partner something that you are grateful for.',
+    'Share what makes your heart beat faster when you think of them',
+    'Make eye contact with your partner and express your feelings without words.',
+    'Choose a scent that you associate with your partner.',
+    'Tell each other how much you love the feeling of cuddling.',
+    'Use only your hands to express gratitude to your partner.',
+    'Share with your partner an emotion that you always feel when you are with them.',
+    'Sing a song to your partner and enjoy the moment.',
+    //Set 4
+    'Share a secret that makes you feel vulnerable.',
+    'Tell your partner the most beautiful thing that you see when looking into their eyes.',
+    'Hold your partner\'s face and express gratitude using your hands.',
+    'Use gentle and soft touch to express your deepest emotions for them.',
+    'Describe the moment in which you realized you loved your partner.',
+    'Share a moment that you thought of your partner and how much you missed them.',
+    'Tell your partner what you like about their kindness and sensibility.',
+    'Choose a song and tell your partner how much it reminds you of them.',
+    'Share a secret of your past with your partner.',
+    'Ask your partner how you can express more love with your body.',
+    'Share a dream that you have about a future with your partner.',
+    'Whisper a line or a poem that makes you feel connected.',
+  ],
+  3: [
+    // Mood
+    // Set 1
+    'Use your tongue to explore your partner\'s neck and ear.',
+    'Blindfold your partner and explore their body with your hands.',
+    'Whisper an erotic command and see your partner follow it.',
+    'Lick a spot of your partner\'s choosing, letting the sensation create pleasure.',
+    'Explore your partner’s skin with soft bites.',
+    'Describe how you would use a blindfold to heighten your senses.',
+    'Use your hands to caress your partner’s body and see where you are guided.',
+    'Describe an erogenous zone to your partner and use your imagination to build tension.',
+    'Have your partner tell you how they would explore your body to elicit pleasure.',
+    'Guide your partner to a comfortable position that is new to both of you.',
+    'Make a trail of kisses from your partner’s neck to their core.',
+    'Tell your partner one thing that makes you feel sexually aroused.',
+    'Have your partner use only their tongue and lips to explore you.',
+    'Create a sensual story that will be a source of pleasure for both.',
+    // Set 2
+    'Explore your partner\'s body with long, slow kisses.',
+    'Blindfold your partner and describe your touch while exploring their body.',
+    'Use your fingers to slowly explore your partner’s lips and mouth.',
+    'Let your partner explore your inner thighs with their mouth.',
+    'Describe how you want to be touched while your partner touches you in the way you describe.',
+    'Share a scene that you have imagined with your partner and then roleplay it.',
+    'Use a toy to explore your partner while they are making eye contact with you.',
+    'Guide your partner by whispering a sensual command and see them follow your lead.',
+    'Describe a sexual fantasy you have using words and movement.',
+    'Use your tongue to explore your partner’s body and enjoy the texture.',
+    'Have your partner tell you how they would explore a new part of your body.',
+    'Play with a mirror and use it while touching yourself and letting your partner enjoy your beauty.',
+    'Use a scent of your choice and then guide your partner while they are blindfolded.',
+    'Undress your partner slowly while making eye contact and enjoying their beauty.',
+    'Use your body to guide your partner into your sexual space without talking.',
+    // Set 3
+    'Use your tongue to explore your partner\'s erogenous zones, focusing on texture.',
+    'Use a sex toy on your partner while making eye contact with them.',
+    'Let your partner explore a part of your body that is not usually touched.',
+    'Have your partner give you an erotic massage while blindfolded.',
+    'Explore your partner\'s inner thighs and guide them with your mouth.',
+    'Describe the most arousing thing that you can imagine happening in bed.',
+    'Have your partner use their hands to explore your body while you are blindfolded.',
+    'Have your partner describe in detail your body and how much they desire it.',
+    'Have your partner pick your favorite piece of clothing and explore you with it.',
+    'Explore the pleasure that a nipple play session can offer.',
+    'Put on an outfit that you would normally not wear, and allow your partner to explore your body in it.',
+    'Try a new position and have your partner take the lead while you explore their body.',
+    'Use your mouth to explore your partner’s body with small and playful bites.',
+    //Set 4
+    'Use a toy of your choice and guide your partner to orgasm.',
+    'Let your partner explore you while you are blindfolded and they have full control.',
+    'Have a full session focusing only on nipple play.',
+    'Let your partner tie your hands and give them permission to explore your body.',
+    'Share a sensual fantasy and guide your partner to play it with you.',
+    'Use only a feather to explore your partner and watch how they react.',
+    'Use the help of a vibrator to explore a part of your partner’s body.',
+    'Have your partner pick an area of your body and have a sensual experience with it.',
+    'Describe what is the best thing that they could do to you and then let them do it.',
+    'Choose a position and give your partner pleasure using their body.',
+    'Explore the concept of orgasm denial to increase pleasure in your session.',
+    'Use your voice to intensify the pleasure in your session by using sensual commands.',
+  ],
+  4: [
+    // Devil
+    // Set 1
+    'Use a toy of your choice to tease your partner.',
+    'Tell your partner how you would dominate them.',
+    'Explore your partner’s erogenous zones with explicit touches.',
+    'Give your partner a soft spank and describe what makes you enjoy it.',
+    'Guide each other with erotic commands while taking a deep breath.',
+    'Allow your partner to tie you and lead you for exploration.',
+    'Use an object as a source of teasing and denial for your partner.',
+    'Have a full session of mutual masturbation while making eye contact.',
+    'Use an anal toy for penetration.',
+    'Allow your partner to penetrate you using their own rhythm.',
+    'Have your partner leave marks on your body as you explore each other.',
+    // Set 2
+    'Use a vibrator to explore your partner\'s body, without directly targeting the erogenous zones.',
+    'Have your partner use a toy on your genitals and watch your reaction.',
+    'Give your partner control over the pace and intensity of your session.',
+    'Explore light bondage and describe how you feel with your partner.',
+    'Use a strap-on and let your partner experience a new sensation.',
+    'Use your breath as a source of dominance and control.',
+    'Use hot wax to stimulate your partner’s skin.',
+    'Play with orgasm denial and let it build up your partner’s desire.',
+    'Create an experience in which your partner gives you full control of their body.',
+    'Have your partner whisper you an erotic command.',
+    'Choose an action and use it as a punishment for you or your partner.',
+    'Use a toy as a source of teasing and denial and enjoy your partner\'s reaction.',
+    'Do not allow your partner to touch you while you explore their body.',
+    'Do not allow your partner to kiss you while you explore their body.',
+    // Set 3
+    'Choose a toy and use it to explore your partner’s limits, without being cruel.',
+    'Have a full session where you have full control of your partner’s body.',
+    'Explore a new role-play session where you explore power dynamics.',
+    'Use a soft bondage piece and explore your partners body while they are tied.',
+    'Use orgasm denial to intensify your session and create anticipation.',
+    'Create a power-play scenario and have your partner ask for permission while exploring each other.',
+    'Explore a new part of your body that you have never shown your partner and have them explore it.',
+    'Have a session with a specific object as a source of teasing and explore the reactions that you create.',
+    'Use your words to describe how much you enjoy dominating or being dominated.',
+    'Have a session where the main focus is domination and submission, following the rules that you create.',
+    'Create a sexual fantasy and guide your partner through it in a session of your choosing.',
+    'Allow your partner to choose a way to explore your body using touch, sound, or smell.',
+    // Set 4
+    'Use a spank to leave a mark on your partner and then explore it.',
+    'Have your partner use you as a toy and explore their sexual side.',
+    'Have a role-play session where you punish and reward your partner.',
+    'Explore your partner’s sexual limits.',
+    'Tie your partner and explore all the reactions they have.',
+    'Have your partner lead you with erotic commands and then guide them.',
+    'Explore a new position where you can be in full control of your partner.',
+    'Use your power as a form of teasing and denial with your partner.',
+    'Create a scenario where your partner needs to ask you for permission.',
+    'Describe the most submissive and powerful version of yourself.',
+    'Use a toy to control your partner and guide them while exploring their body.',
+    'Use your mouth and hands to create new sensations while your partner has no say on them.',
+    'Leave a mark on your partner and let them be in charge for the rest of the session.',
+  ],
+};
+
+
+==============================================================================
+FILE: lib/logs/app_logo.dart
+==============================================================================
+List<Map<int, dynamic>> cardImages = [
+  {
+    1: "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Fc1.jpg?alt=media&token=bb3aa312-5f4e-402e-b7f1-a17a1c741c4f"
+  },
+  {
+    2: "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Fc2.jpg?alt=media&token=723e5527-ca23-4eb5-939f-c2bec75adb7a"
+  },
+  {
+    3: "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Fc3.jpg?alt=media&token=f9bfc57e-44c7-4379-a9f3-19d2ae3feebb"
+  },
+  {
+    4: "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Fc4.jpg?alt=media&token=de6322c3-e6f8-40f4-9c2d-7e05b43d4bb5"
+  },
+];
+List<String> truthDareCards = [
+  "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Flove1.jpg?alt=media&token=c7ee55e2-de04-49c0-8960-237ad6454783",
+  "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Flove2.jpg?alt=media&token=4c8db028-41ce-4a68-9b97-7d3ab2996c0d",
+  "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Flove3.jpg?alt=media&token=1a6baaad-982e-4373-abd0-d03b2e57d936",
+  "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Flove4.jpg?alt=media&token=ea91d5c7-64ce-47d3-9f6c-d0dc7d626ee3",
+  "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Flove5.jpg?alt=media&token=71a9392f-04ba-4bb2-a2a4-5a6dcdba336d",
+  "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Flove6.jpg?alt=media&token=d352a1a1-8904-4956-be03-1f59a6d18c49",
+  "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Flove7.jpg?alt=media&token=c821ff8b-2640-4b89-ba7c-a96438bb382a",
+  "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Flove8.jpg?alt=media&token=f3c2ad38-e7da-49b2-9ef3-b03b671aa486",
+  "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Flove9.jpg?alt=media&token=3642852f-631a-4f4c-a8f4-5533ad2e5ea7",
+  "https://firebasestorage.googleapis.com/v0/b/listen-57bf4.appspot.com/o/curves%2Flove10.jpg?alt=media&token=043a3c5d-8af5-4fef-b74e-fd256d42c7c3"
+];
+List<String> suggestions = [
+  "Who says dating has to be straight? Add some Curves to the equation.",
+  "Don't let romance stall. Find the excitement you're craving with Curves.",
+  "Beyond the predictable. Explore the uncharted territory of desire with Curves.",
+  "Break through the plateau. Let Curves guide you to new heights of passion."
+];
+
+
+==============================================================================
+FILE: lib/logs/truth_dare_tasks.dart
+==============================================================================
+final List<String> truths = [
+  "What is your biggest fear?",
+  "Have you ever lied to your best friend?",
+  "What is a secret you've never told anyone?",
+  // Soft Romance
+  "What makes you feel most loved when we are in bed together?",
+  "What is your favorite memory of us in bed?",
+  "What small gesture in bed makes you feel most cherished?",
+
+  // Core Romance
+  "How has being in bed with me changed your view of intimacy?",
+  "What are three words you would use to describe our connection in bed?",
+  "What do you dream of doing in bed together?",
+
+  //Erotic
+  "What is the most erotically charged thing we've done in bed?",
+  "Which of my touches in bed make you shiver?",
+  "Have you ever had a sexual experience under the influence of alcohol or another drug?",
+  "What part of my body is your favorite to kiss, lick, or touch in bed?",
+  "Have you ever had a memorable experience with oral sex in bed?",
+
+  // Hard Erotic
+  "What is the most daring thing you'd like to try in bed?",
+  "Have you ever experimented with spanking or impact play in bed?",
+  "What is the most extreme fantasy you would like to explore in bed?",
+  "What kind of power dynamic turns you on the most in bed?",
+
+  // Sex
+  "What is your favorite way to be touched before sex in bed?",
+  "What is the hottest thing I can do during sex in bed?",
+  "What is your favorite sex position?",
+  "What turns you off during sex?",
+  "What do you fantasize about when you masturbate in bed?",
+  "What kind of lingerie would you like to see me wear in bed?",
+
+// From the initialCategories
+  "Have you ever explored bondage or light bondage in bed?",
+  "What is your favorite toy to use for pleasure in bed?",
+  "What do you like the most about dominance and submission in bed?",
+  "Have you ever experienced the thrill of teasing and denial in bed?",
+  "Have you ever been adventurous with anal sex in bed?",
+  "What makes a massage sensual and exciting for you in bed?",
+  "What kind of foot play do you enjoy the most in bed?",
+  "What have you learned from tantra that changed you in bed?",
+  "What is your most exciting experience playing a role in bed?",
+  "What is the most impactful type of sensory deprivation for you in bed?",
+  "What do you enjoy about masturbation, and how does it make you feel in bed?",
+  "What is the first thing you notice in a person’s body when using body writing in bed?",
+  "Have you ever had a partner use breath play on you in bed?",
+  "What is your favorite thing about hair play in bed?",
+  "What makes you enjoy voyeurism in bed?",
+  "How would you describe the feeling of exhibitionism in bed?",
+  "Have you ever experimented with choking as a form of play in bed?",
+  "What is your feeling about light bondage, is it for you in bed?",
+  "What makes you enjoy photos and videos in bed?",
+  "What is your feeling about lipstick in bed?",
+];
+final List<String> dares = [
+  "Do 10 push-ups right now.",
+  "Sing a song loudly.",
+  "Dance without music for 30 seconds.",
+  // Soft Romance
+  "Give your partner a gentle kiss on the forehead.",
+  "Cuddle your partner and whisper something sweet into their ear.",
+  "Trace a heart on your partner's back with your finger.",
+  // Core Romance
+  "Share a loving memory with your partner and recreate its mood with your touch.",
+  "Take each other's hand and tell each other how grateful you are to be in bed together.",
+  "Describe what makes you feel most connected when you are in bed together",
+
+  //Erotic
+  "Lick your partner from their neck to their belly button",
+  "Give your partner a sensual massage using only your hands and a bit of oil.",
+  "Use a blindfold on your partner and use your fingers to explore them on different places",
+  "Choose one of the erogenous areas in your partner and kiss and lick them for 2 minutes",
+
+  // Hard Erotic
+  "Give your partner a light spank and describe the action while it's happening",
+  "Pick a toy and demonstrate how you would use it on your partner in bed using only your body",
+  "Use a blindfold on your partner and give them an erotic command.",
+  "Use a toy or your own body to tease your partner, and then deny them for at least 3 minutes",
+
+  // Sex
+  "Give your partner a sensual kiss that is intended to lead to sex",
+  "Whisper to your partner a fantasy while you are touching them",
+  "Put your partner in your favorite sex position",
+  "Guide your partner and give them pleasure with only your hands.",
+  "Masturbate while making eye contact with your partner and showing you have a good time.",
+  "Ask your partner to put on your favorite lingerie and describe how you feel.",
+
+// From the initialCategories
+  "Put on a blindfold and allow your partner to gently guide you around your bed.",
+  "Choose a toy and describe how you would use it on your partner, without using any hands",
+  "Describe how you would dominate your partner verbally and physically in a few sentences.",
+  "Describe using only your tongue what is your favorite thing about giving oral",
+  "Blindfold your partner and describe with detail how you will use food to stimulate them.",
+  "Tease your partner, but do not touch them.",
+  "Allow your partner to slowly move their tongue on you in a place that they choose.",
+  "Ask your partner to explore a part of your foot",
+  "Incorporate a tantric technique and guide your partner on it.",
+  "Act out a sexual role-play using a character that is not you",
+  "Blindfold your partner and play different sounds with your mouth or body",
+  "Mix an alcoholic beverage and let your partner describe it without tasting it",
+  "Take a sexy photo or video of yourself in bed and share it with your partner",
+  "Choose a part of your favorite porn video and act it out in bed",
+  "Let your partner write on your body using oil or lotion",
+  "Use only your breath and try to stimulate your partner without touch",
+  "Play with your partner's hair using your hands, mouth, or tongue",
+  "Spray a scent or perfume on your body and move around to seduce your partner",
+  "Let your partner watch you masturbate in bed",
+  "Let your partner exhibit your body for them in bed",
+  "Allow your partner to use some pressure on your neck to stimulate you",
+  "Wear something that allows your partner to easily apply light bondage to your body in bed"
+];
+
+
+==============================================================================
+FILE: lib/logs/grid_tasks.dart
+==============================================================================
+final Map<int, List<String>> gridCells = {
+  1: [
+    'Gentle Kiss',
+    'Forehead Kiss',
+    'Cheek Kiss',
+    'Hold Hands',
+    'Smile Together'
+  ],
+  2: [
+    'Whisper a Secret',
+    'Whisper a Compliment',
+    'Say a Memory',
+    'Laugh Together',
+    'Hum a Song'
+  ],
+  3: [
+    'Sensual Touch (Arm)',
+    'Stroke Hair',
+    'Trace Fingers on Arm',
+    'Gently Hold Forearm',
+    'Soft Shoulder Touch'
+  ],
+  4: [
+    'Compliment',
+    'Say Something Sweet',
+    'Share a Positive Thought',
+    'Tell What You Admire',
+    'Encourage Gently'
+  ],
+  5: [
+    'Eye Contact Hold',
+    'Blink Synchronization',
+    'Mirror Smile',
+    'Wink Playfully',
+    'Observe Closely'
+  ],
+  6: [
+    'Tease (Light Touch)',
+    'Lightly Tickling Palm',
+    'Brush Fingers',
+    'Hover Near Skin',
+    'Gentle Poke'
+  ],
+  7: [
+    'Massage (Back)',
+    'Massage (Neck)',
+    'Massage (Shoulders)',
+    'Massage (Lower Back)',
+    'Massage (Spine Gently)'
+  ],
+  8: [
+    'Blindfold',
+    'Cover Eyes Playfully',
+    'Guess Who Touch',
+    'Sense of Direction Test',
+    'Peek-a-Boo'
+  ],
+  9: [
+    'Kiss (Neck)',
+    'Brush Lips on Neck',
+    'Gentle Neck Nuzzle',
+    'Nibble Lightly',
+    'Trace Neckline'
+  ],
+  10: [
+    'Scent Play',
+    'Use a Candle Scent',
+    'Waft Perfume',
+    'Describe a Scent',
+    'Breathe in Fresh Air'
+  ],
+  11: ['Body Kiss', 'Butterfly Kiss', 'Heart Kiss', 'Chest Kiss', 'Hand Kiss'],
+  12: [
+    'Shared Breath',
+    'Synchronized Inhale',
+    'Exhale Together',
+    'Breathe in Harmony',
+    'Gentle Breath Hug'
+  ],
+  13: [
+    'Lingerie Reveal',
+    'Pick Favorite Outfit',
+    'Try a New Look',
+    'Fashion Advice',
+    'Compliment Style'
+  ],
+  14: [
+    'Describe a Fantasy',
+    'Dream Vacation Story',
+    'Dream House Plan',
+    'Your Ideal Day',
+    'Imaginative World'
+  ],
+  15: [
+    'Sensual Touch (Leg)',
+    'Trace Knee',
+    'Light Leg Caress',
+    'Knee Bump Play',
+    'Calf Massage'
+  ],
+  16: [
+    'Undress (One Item)',
+    'Slip Off Accessories',
+    'Fold Item Neatly',
+    'Playful Shoe Removal',
+    'Light Sock Tug'
+  ],
+  17: [
+    'Kiss (Inner Thigh)',
+    'Linger Near Thigh',
+    'Light Thigh Nibble',
+    'Gentle Thigh Stroke',
+    'Trace Lines'
+  ],
+  18: [
+    'Use a Feather/Light Hand touch',
+    'Brush Cheek with Feather',
+    'Circle Palm with Feather',
+    'Trace Arm Patterns',
+    'Light Skin Taps'
+  ],
+  19: [
+    'Erotic Command',
+    'Request a Gentle Task',
+    'Ask for Whisper',
+    'Ask for Eye Contact',
+    'Softly Request a Pose'
+  ],
+  20: [
+    'Massage (Hands)',
+    'Fingers Massage',
+    'Palm Circles',
+    'Wrist Relaxation',
+    'Squeeze Gently'
+  ],
+  21: [
+    'Taste Me',
+    'Explore Lips Taste',
+    'Test Favorite Flavor',
+    'Savor Together',
+    'Describe Tastes'
+  ],
+  22: [
+    'Explore with Tongue',
+    'Taste Gentle Forearm',
+    'Sense Playful Knuckle',
+    'Tongue Texture Guess',
+    'Gentle Wrist Explore'
+  ],
+  23: [
+    'Blind Taste Test',
+    'Use Sweet',
+    'Use Salt Flavor Guess',
+    'Citrus Touch Guess',
+    'Playful Snack'
+  ],
+  24: [
+    'Roleplay Start',
+    'Pick Character',
+    'Role Soft Action Play',
+    'Lead a Story Tell',
+    'Add Lines Soft Act'
+  ],
+  25: [
+    'Body Lick',
+    'Gentle Style Trace',
+    'Bare Arm Feel',
+    'Slow Describe Move',
+    'Taste Clear Area Soft'
+  ],
+  26: [
+    'Guide my Hands',
+    'Motion Soft Tied',
+    'Lead Pause Feels',
+    'Trace Smoother Built',
+    'Draw Limited Mapping'
+  ],
+  27: [
+    'Tease (Bite)',
+    'Nip Holding Easy Timing',
+    'Explores Yield Oppress',
+    'Ending/A+Alt Connect',
+    'Twilight Debug+ =DivideTrace(Snip Timing)'
+  ],
+  28: [
+    'Explicit Whisper',
+    'Erotic Word Choice',
+    'Naughty Suggest',
+    'Vivid Details Feel',
+    'Breath Control Play'
+  ],
+  29: [
+    'Soft Spank',
+    'Gentle Touch Play',
+    'Tapping Lightly',
+    'Press Feel Skin',
+    'Soft Beat Rhythm'
+  ],
+  30: [
+    'Full Body Exploration',
+    'Slow Body Trace',
+    'Gentle Full Mapping',
+    'Explore Feel Soft',
+    'Connect Each Touch'
+  ],
+};
+
+Map<int, String> generateTaskMessages(String playerGender, String taskX) {
+  Map<int, String> taskMessages = {
+    1: "Allow your $playerGender partner to greet you with a $taskX",
+    2: "Your $playerGender partner will now $taskX",
+    3: "Let your $playerGender partner explore your $taskX",
+    4: "Now let your $playerGender partner express what they $taskX",
+    5: "Hold a loving gaze with your $playerGender partner or $taskX",
+    6: "Your $playerGender partner will now tease you with $taskX",
+    7: "Let your $playerGender partner now relax you with a $taskX",
+    8: "Allow your $playerGender partner to play with your sense of sight, have them $taskX",
+    9: "Now let your $playerGender partner kiss and explore your neck, allow them to $taskX",
+    10: "Allow your $playerGender partner to play with your sense of smell, allow them to $taskX",
+    11: "Your $playerGender partner will now explore your body with a sensual kiss, choosing between a $taskX",
+    12: "Breathe deeply with your $playerGender partner, and $taskX",
+    13: "Your $playerGender partner will now show you their favorite outfit, and they will $taskX",
+    14: "Now let your $playerGender partner captivate your mind by $taskX",
+    15: "Let your $playerGender partner move their hands on your leg, exploring your knee with $taskX",
+    16: "Allow your $playerGender partner to slowly remove one item of your clothing. They can $taskX",
+    17: "Allow your $playerGender partner to heighten your arousal with a kiss on your inner thigh. They can $taskX",
+    18: "Let your $playerGender partner explore your skin with a feather or with a light hand touch. Your skin can be explored on your $taskX",
+    19: "Allow your $playerGender partner to give you an erotic command. They can $taskX",
+    20: "Let your $playerGender partner provide you a sensual massage on your hands. They can $taskX",
+    21: "Allow your $playerGender partner to explore your taste and your lips, they can also $taskX",
+    22: "Now let your $playerGender partner explore you with their tongue. Allow them to $taskX",
+    23: "Your $playerGender partner will now have you participate in a blind taste test using $taskX",
+    24: "Let your $playerGender partner choose a character and let them $taskX",
+    25: "Allow your $playerGender partner to explore your body with a lick. Let them $taskX",
+    26: "Allow your $playerGender partner to guide you to explore their body. They can $taskX",
+    27: "Your $playerGender partner will now tease you with a bite, they can choose to $taskX",
+    28: "Now let your $playerGender partner whisper you an erotic message, with $taskX",
+    29: "Allow your $playerGender partner to explore your skin using a soft spank. They can $taskX",
+    30: "Now let your $playerGender partner fully explore your body. They can $taskX",
+  };
+  return taskMessages;
+}
+
+
+==============================================================================
+FILE: lib/api/urls.dart
+==============================================================================
+class APIUrls {
+  static const String BASE_URL = "https://sample-e1mp.onrender.com";
+  static const String LOGIN = "$BASE_URL/user/login";
+  static const String REGISTER = "$BASE_URL/user/register";
+  static const String ARTICLES = "$BASE_URL/learn/get_articles";
+  static String SECTIONS(articleID) =>
+      "$BASE_URL/learn/get_section?article_id=$articleID";
+  static String SECTION_READINGS(int article_id) =>
+      "$BASE_URL/learn/get_section?article_id=$article_id";
+}
+
+
+==============================================================================
+FILE: lib/api/elements.dart
+==============================================================================
+class APIElements{
+  static Map<String, String> headers(String token) => {
+    'accept': 'application/json',
+    'Authorization':'Bearer $token'
+  };
+}
+
+==============================================================================
+FILE: lib/routes/feedback.dart
+==============================================================================
+import 'package:curve/services/db.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+class FeedbackPage extends StatefulWidget {
+  const FeedbackPage({super.key});
+
+  @override
+  State<FeedbackPage> createState() => _FeedbackPageState();
+}
+
+class _FeedbackPageState extends State<FeedbackPage> {
+  // State variables for each question
+  double _starRating = 0;
+  bool? _isEasyToUnderstand;
+  final TextEditingController _improvementController = TextEditingController();
+  String _selectedFeature = '4 Cards';
+  final TextEditingController _additionalFeedbackController =
+      TextEditingController();
+  bool _isSubmitting = false;
+
+  Widget _buildStarRating() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (index) {
+        final starIndex = index + 1;
+        return IconButton(
+          icon: Icon(
+            starIndex <= _starRating ? Icons.star : Icons.star_border,
+            color: Colors.amber,
+          ),
+          onPressed: () {
+            setState(() {
+              _starRating = starIndex.toDouble();
+            });
+          },
+        );
+      }),
+    );
+  }
+
+  Future<void> _submitFeedback() async {
+    if (_starRating == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please provide a rating")),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      final userId = user?.uid ?? 'anonymous';
+
+      await DatabaseService().addFeedback(
+        rating: _starRating,
+        isEasyToUnderstand: _isEasyToUnderstand,
+        improvementSuggestion: _improvementController.text,
+        favoriteFeature: _selectedFeature,
+        additionalFeedback: _additionalFeedbackController.text,
+        userId: userId,
+      );
+
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Thank You!'),
+          content: const Text('Your feedback has been submitted.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Go back to settings
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+
+      // Clear fields
+      setState(() {
+        _starRating = 0;
+        _isEasyToUnderstand = null;
+        _improvementController.clear();
+        _selectedFeature = '4 Cards';
+        _additionalFeedbackController.clear();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error submitting feedback: $e")),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Feedback'),
+      ),
+      body: _isSubmitting
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Overall Experience (Star Rating)
+                  const Text(
+                    '1. How would you describe your overall experience using Curves?',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildStarRating(),
+                  const SizedBox(height: 24),
+
+                  // 2. First Impression (Yes/No)
+                  const Text(
+                    '2. First impression of the app — Was it easy to understand?',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: RadioListTile<bool>(
+                          title: const Text('Yes'),
+                          value: true,
+                          groupValue: _isEasyToUnderstand,
+                          onChanged: (value) {
+                            setState(() {
+                              _isEasyToUnderstand = value;
+                            });
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: RadioListTile<bool>(
+                          title: const Text('No'),
+                          value: false,
+                          groupValue: _isEasyToUnderstand,
+                          onChanged: (value) {
+                            setState(() {
+                              _isEasyToUnderstand = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 3. How to improve the overall user experience
+                  const Text(
+                    '3. How could we improve the overall user experience?',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _improvementController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Share your suggestions...',
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 4. Which feature of the app did you enjoy the most?
+                  const Text(
+                    '4. Which feature of the app did you enjoy the most?',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  RadioListTile<String>(
+                    title: const Text('4 Cards'),
+                    value: '4 Cards',
+                    groupValue: _selectedFeature,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedFeature = value ?? '';
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text('Keywords Obsession'),
+                    value: 'Keywords Obsession',
+                    groupValue: _selectedFeature,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedFeature = value ?? '';
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text('Truth or Dare'),
+                    value: 'Truth or Dare',
+                    groupValue: _selectedFeature,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedFeature = value ?? '';
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text('Intimacy Maze'),
+                    value: 'Intimacy Maze',
+                    groupValue: _selectedFeature,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedFeature = value ?? '';
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 5. Any other feedback
+                  const Text(
+                    '5. Do you have any other feedback that could help us make Curves better?',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _additionalFeedbackController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Your feedback...',
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Submit button
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _submitFeedback,
+                      child: const Text('Submit Feedback'),
+                    ),
+                  ),
+                  const SizedBox(height: 40), // Bottom padding
+                ],
+              ),
+            ),
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/routes/learn_details.dart
+==============================================================================
+import 'package:curve/models/learn_model.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/learn_provider.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:provider/provider.dart';
+
+class LearnDetail extends StatelessWidget {
+  final Article article;
+  const LearnDetail(this.article, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final learnProvider = Provider.of<LearnProvider>(context, listen: false);
+
+    return Scaffold(
+      appBar: AppBar(title: Text("Sections")),
+      body: Consumer<ColorsProvider>(builder: (context, color, _) {
+        return FutureBuilder(
+            future: article.sections.isEmpty
+                ? learnProvider.getArticle(article)
+                : Future.value(true),
+            builder: (ctx, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CupertinoActivityIndicator());
+              } else if (snapshot.connectionState == ConnectionState.done) {
+                return ListView.builder(
+                    itemCount: article.sections.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            color: color.placeHolders(),
+                          ),
+                          //height: MediaQuery.of(context).size.height,
+                          child: Padding(
+                            padding: const EdgeInsets.all(18.0),
+                            child: Markdown(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                data: article.sections[index].content),
+                          ),
+                        ),
+                      );
+                    });
+              }
+              return Container();
+            });
+      }),
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/routes/maze_grid.dart
+==============================================================================
+import 'dart:async';
+import 'dart:math';
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/gird_provider.dart';
+import 'package:curve/services/responsive.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/bi.dart';
+import 'package:iconify_flutter/icons/ion.dart';
+import 'package:provider/provider.dart';
+
+// ------------------ PROVIDER ------------------
+
+class MazeGrid extends StatelessWidget {
+  const MazeGrid({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final gameProvider = context.watch<GameProvider>();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Intimacy Maze"),
+        actions: [
+          IconButton(
+            onPressed: () => gameProvider.reset(),
+            icon: const Icon(CupertinoIcons.restart),
+          )
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Consumer<ColorsProvider>(builder: (context, color, _) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: GridView.builder(
+                  itemCount: 30,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: Responsive.isMobile(context) ? 5 : 10,
+                      mainAxisSpacing: 5,
+                      crossAxisSpacing: 5),
+                  itemBuilder: (ctx, idx) {
+                    // Board cell number for this index:
+                    int cellNumber = 30 - idx;
+
+                    bool p1Here = (30 - gameProvider.player1Position) == idx;
+                    bool p2Here = (30 - gameProvider.player2Position) == idx;
+
+                    Color cellColor = color.cellColor();
+                    String textToShow = "$cellNumber";
+
+                    if (p1Here && p2Here) {
+                      // Both players on same cell
+                      cellColor = color.playerCell("s");
+                      textToShow = Ion.heart;
+                    } else if (p1Here) {
+                      cellColor = color.playerCell("m");
+                      textToShow = Ion.male_sharp;
+                    } else if (p2Here) {
+                      cellColor = color.playerCell("f");
+                      textToShow = Ion.female_sharp;
+                    }
+
+                    return GridTile(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: cellColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            if ((textToShow != Ion.female_sharp) &&
+                                (textToShow != Ion.male_sharp) &&
+                                (textToShow != Ion.heart))
+                              Text(
+                                textToShow,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  //color: CupertinoColors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            if ((textToShow == Ion.female_sharp) ||
+                                (textToShow == Ion.male_sharp) ||
+                                (textToShow == Ion.heart))
+                              Iconify(textToShow,
+                                  size: 60,
+                                  color: textToShow == Ion.heart
+                                      ? color.playerIcons("s")
+                                      : textToShow != Ion.female_sharp
+                                          ? color.playerIcons("m")
+                                          : color.playerIcons("f")),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                    decoration: BoxDecoration(
+                        color: color.placeHolders(),
+                        borderRadius: BorderRadius.circular(12)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: AutoSizeText(
+                        gameProvider.task,
+                        maxLines: 3,
+                      ),
+                    )),
+              ),
+              SizedBox(
+                  height: Responsive.isMobile(context)
+                      ? MediaQuery.of(context).size.height * 0.03
+                      : 0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Iconify(
+                          gameProvider.currentPlayer == 1
+                              ? Ion.male_sharp
+                              : Ion.female_sharp,
+                          size: 45,
+                          color: gameProvider.currentPlayer == 1
+                              ? color.playerIcons("m")
+                              : color.playerIcons("f")),
+                      Text(
+                          "${gameProvider.currentPlayer == 1 ? "Male" : "Female"} Turn"),
+                    ],
+                  ),
+                  const SizedBox(width: 20),
+                  const DiceRollerPage(),
+                ],
+              ),
+              const SizedBox(height: 5)
+            ],
+          );
+        }),
+      ),
+    );
+  }
+}
+
+// ------------------ DICE ROLLER ------------------
+
+class DiceRollerPage extends StatefulWidget {
+  const DiceRollerPage({super.key});
+
+  @override
+  State<DiceRollerPage> createState() => _DiceRollerPageState();
+}
+
+class _DiceRollerPageState extends State<DiceRollerPage>
+    with TickerProviderStateMixin {
+  int _finalDiceValue = 1;
+  int _currentDiceValue = 1;
+
+  late AnimationController _controller;
+  late Animation<double> _rotationX;
+  late Animation<double> _rotationY;
+  Timer? _randomizerTimer;
+
+  final _diceIcons = [
+    Bi.dice_1_fill,
+    Bi.dice_2_fill,
+    Bi.dice_3_fill,
+    Bi.dice_4_fill,
+    Bi.dice_5_fill,
+    Bi.dice_6_fill,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+
+    // Default rotations (will be reset on each roll)
+    _rotationX = Tween<double>(begin: 0, end: 0).animate(_controller);
+    _rotationY = Tween<double>(begin: 0, end: 0).animate(_controller);
+
+    // When animation ends, finalize the dice face
+    _controller.addStatusListener((status) async {
+      if (status == AnimationStatus.completed) {
+        // Stop cycling
+        _randomizerTimer?.cancel();
+        setState(() {
+          _currentDiceValue = _finalDiceValue;
+        });
+
+        // Once dice stops, move the current player by finalDiceValue with animation
+        await context.read<GameProvider>().advancePlayer(_finalDiceValue);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _randomizerTimer?.cancel();
+    super.dispose();
+  }
+
+  void _rollDice() {
+    if (_controller.isAnimating) return;
+
+    setState(() {
+      // Choose a final face and random rotations
+      _finalDiceValue = Random().nextInt(6) + 1;
+
+      // Randomize how many spins (each spin ~ 2π)
+      double spinsX = Random().nextInt(2) + 2; // between 2 and 3 full rotations
+      double spinsY = Random().nextInt(2) + 2; // between 2 and 3 full rotations
+
+      // Random direction: positive or negative rotation
+      if (Random().nextBool()) spinsX = -spinsX;
+      if (Random().nextBool()) spinsY = -spinsY;
+
+      _rotationX = Tween<double>(begin: 0, end: spinsX * 2 * pi)
+          .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+      _rotationY = Tween<double>(begin: 0, end: spinsY * 2 * pi)
+          .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+      _controller.reset();
+    });
+
+    // During the animation, rapidly change the dice face to simulate tumbling
+    _randomizerTimer?.cancel();
+    _randomizerTimer =
+        Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      // Set a random face while rolling
+      setState(() {
+        _currentDiceValue = Random().nextInt(6) + 1;
+      });
+    });
+
+    _controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentIcon = _diceIcons[_currentDiceValue - 1];
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        // Apply 3D-like transforms. A perspective transform adds realism.
+        final transform = Matrix4.identity()
+          ..setEntry(3, 2, 0.001) // perspective
+          ..rotateX(_rotationX.value)
+          ..rotateY(_rotationY.value);
+
+        return GestureDetector(
+          onTap: _rollDice,
+          child: Transform(
+            transform: transform,
+            alignment: Alignment.center,
+            child: Consumer<ColorsProvider>(builder: (context, color, _) {
+              return Iconify(
+                currentIcon,
+                size: Responsive.isMobile(context)
+                    ? MediaQuery.of(context).size.width * 0.2
+                    : MediaQuery.of(context).size.width * 0.05,
+                color: color.diceColor(),
+              );
+            }),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/routes/four_cards.dart
+==============================================================================
+
+import 'package:curve/logs/4_cards_task.dart';
+import 'package:curve/models/four_card_model.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/responsive.dart';
+import 'package:flutter/material.dart';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
+import 'package:provider/provider.dart';
+
+class FourCards extends StatefulWidget {
+  const FourCards({super.key});
+
+  @override
+  State<FourCards> createState() => _FourCardsState();
+}
+
+class _FourCardsState extends State<FourCards> with TickerProviderStateMixin {
+  // Words to show on each card
+  List<FourCardModel> words = List.generate(4, ((_) => FourCardModel()));
+
+  // Keep track of whether the task card is being shown.
+  bool _showTask = false;
+  String _selectedTask = "";
+  String _selectedCard = "";
+
+  // Animation controllers for flip animation
+  late AnimationController _flipController;
+  late Animation<double> _flipAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _flipController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
+    _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _flipController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _flipController.dispose();
+    super.dispose();
+  }
+
+  void _onCardTap(String cardId, String task) async {
+    setState(() {
+      _selectedCard = cardId;
+      _selectedTask = task;
+    });
+    // Start the flip animation
+    await _flipController.forward();
+    // After the flip is completed, show the overlay card
+    setState(() {
+      _showTask = true;
+    });
+  }
+
+  void _closeTask() async {
+    // Close the overlay card and flip back
+    setState(() {
+      _showTask = false;
+    });
+    words = List.generate(4, ((_) => FourCardModel()));
+    await _flipController.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("4 Cards"),
+      ),
+      body: Stack(
+        children: [
+          // Grid covering the main screen
+          Padding(
+            padding: EdgeInsets.symmetric(
+                vertical: MediaQuery.of(context).size.height * 0.05,
+                horizontal: Responsive.isMobile(context)
+                    ? 0
+                    : MediaQuery.of(context).size.width * 0.35),
+            child: GridView.builder(
+              padding: const EdgeInsets.all(8.0),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: Responsive.isMobile(context) ? 4 : 10,
+                crossAxisSpacing: Responsive.isMobile(context) ? 4 : 10,
+                mainAxisExtent: Responsive.isMobile(context)
+                    ? MediaQuery.of(context).size.height * 0.35
+                    : MediaQuery.of(context).size.height * 0.3,
+              ),
+              scrollDirection: Responsive.isMobile(context)
+                  ? Axis.vertical
+                  : Axis.horizontal,
+              itemCount: 4,
+              itemBuilder: (context, index) {
+                String cardID = words[index].cardId;
+                int cardNumber = words[index].cardNumber;
+                String task = "";
+                List<String> taskList = combinedTasks[cardNumber] ?? [];
+                if (taskList.isNotEmpty) {
+                  task = taskList[math.Random().nextInt(43)];
+                }
+
+                return GestureDetector(
+                  onTap: !_showTask ? () => _onCardTap(cardID, task) : null,
+                  child: AnimatedBuilder(
+                    animation: _flipAnimation,
+                    builder: (context, child) {
+                      bool isSelected =
+                          _selectedCard == cardID && _flipController.value > 0;
+
+                      final flipValue = isSelected ? _flipAnimation.value : 0.0;
+                      double angle =
+                          flipValue * math.pi; // rotate from 0 to 180 degrees
+
+                      if (!isSelected) {
+                        angle = 0;
+                      }
+
+                      bool showBack = angle > math.pi / 2;
+
+                      return Transform(
+                        transform: Matrix4.identity()
+                          ..setEntry(3, 2, 0.001)
+                          ..rotateY(angle),
+                        alignment: Alignment.center,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              opacity: 0.85,
+                              fit: BoxFit.fill,
+                              image: AssetImage(
+                                "assets/images/c${words[index].cardNumber}.jpg",
+                              ),
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(233),
+                                blurRadius: 4,
+                                offset: const Offset(2, 2),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: showBack
+                                ? Container() // Once flipped beyond 90°, show the "back" (blank)
+                                : Text(
+                                    "",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Blur background and overlay card
+          if (_showTask)
+            Positioned.fill(
+              child: Stack(
+                children: [
+                  // ignore: deprecated_member_use
+                  Container(color: Colors.black.withOpacity(0.4)),
+                  // Blur effect
+                  BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                  // ignore: deprecated_member_use
+                      color: Colors.black.withOpacity(0),
+                    ),
+                  ),
+                  // The task card
+                  Center(
+                    child: Consumer<ColorsProvider>(
+                      builder: (context, color, _) {
+                        return Container(
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.height * 0.6,
+                          decoration: BoxDecoration(
+                            color: color.taskCard(),
+                            borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(90),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text(
+                                _selectedTask,
+                                style: const TextStyle(
+                                    fontSize: 28, fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                             
+                              const Text(
+                                "Here is a task. Complete this challenge!",
+                                style: TextStyle(fontSize: 18),
+                                textAlign: TextAlign.center,
+                              ),
+                             
+                              TextButton(
+                                onPressed: _closeTask,
+                                child: const Text("Close"),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/routes/truth_dare.dart
+==============================================================================
+import 'dart:math';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/responsive.dart';
+import 'package:curve/logs/truth_dare_tasks.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class TruthDareCardPage extends StatefulWidget {
+  const TruthDareCardPage({super.key});
+
+  @override
+  State<TruthDareCardPage> createState() => _TruthDareCardPageState();
+}
+
+class _TruthDareCardPageState extends State<TruthDareCardPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  bool _showBack = false; // Track which side of the card is shown
+  String _currentTask = '';
+  int itemSelectInt = Random().nextInt(10) + 1;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    _animation = Tween<double>(begin: 0, end: pi).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    // Initially show some message or no task
+    _currentTask = "Tap to Reveal";
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _flipCard() async {
+    if (_showBack) {
+      // If currently showing the back, we want to flip back to front
+      // Reverse the animation
+      await _controller.reverse();
+      setState(() {
+        _showBack = false;
+        _currentTask = "Tap to Reveal";
+        itemSelectInt = Random().nextInt(10) + 1;
+      });
+    } else {
+      // If currently showing the front, we want to flip to back
+      // Pick truth or dare randomly
+      bool isTruth = Random().nextBool();
+      String task;
+      if (isTruth) {
+        task = truths[Random().nextInt(truths.length)];
+      } else {
+        task = dares[Random().nextInt(dares.length)];
+      }
+
+      setState(() {
+        _currentTask = (isTruth ? "Truth: " : "Dare: ") + task;
+      });
+
+      // Forward the animation to flip the card
+      await _controller.forward();
+      setState(() {
+        _showBack = true;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cardWidth = Responsive.isMobile(context)
+        ? MediaQuery.of(context).size.width * 0.9
+        : MediaQuery.of(context).size.width * 0.3;
+    final cardHeight = Responsive.isMobile(context)
+        ? MediaQuery.of(context).size.height * 0.6
+        : MediaQuery.of(context).size.height;
+    Map<int, Color> items = {
+      1: Colors.brown.shade100,
+      2: Colors.blue.shade100,
+      3: Colors.green.shade100,
+      4: Colors.brown.shade100,
+      5: Colors.lightBlueAccent.shade100,
+      6: Colors.brown.shade100,
+      7: Colors.lightBlue.shade100,
+      8: Colors.redAccent.shade100,
+      9: Colors.blueAccent.shade100,
+      10: Colors.blueGrey.shade100,
+    };
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Truth or Dare"),
+      ),
+      body: Center(
+        child: GestureDetector(
+          onTap: _flipCard,
+          child: AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              // Rotate the card
+              double rotationValue = _animation.value;
+              // Check if we show front or back
+              final isFront = rotationValue < (pi / 2);
+
+              // We need to adjust the rotation so that
+              // front and back show correctly (no mirror text)
+              final displayRotation =
+                  isFront ? rotationValue : rotationValue - pi;
+
+              return Transform(
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001) // perspective
+                  ..rotateY(displayRotation),
+                alignment: Alignment.center,
+                child: Consumer<ColorsProvider>(
+                    builder: (context, colorProvide, _) {
+                  return Container(
+                    width: cardWidth,
+                    height: cardHeight,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        opacity: 0.6,
+                        image:
+                            AssetImage("assets/images/love$itemSelectInt.jpg"),
+                      ),
+                      color: CupertinoColors.black,
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: isFront
+                            ? Text("Tap to Reveal",
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .displayMedium!
+                                    .copyWith(
+                                      color: items[itemSelectInt],
+                                      fontWeight: FontWeight.bold,
+                                    ))
+                            : Text(
+                                _currentTask,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: items[itemSelectInt],
+                                  fontSize: 22,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                      ),
+                    ),
+                  );
+                }),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/routes/keyword_obesseion.dart
+==============================================================================
+import 'dart:math';
+import 'package:curve/services/settings_model.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class KeywordObesseion extends StatelessWidget {
+  const KeywordObesseion({super.key});
+
+  Future<void> _showTasksDialog(
+      BuildContext context, String category, categoryTasks) async {
+    // We'll manage tasks and current task inside setState of a StatefulBuilder in the dialog
+    List<String> tasks = List.of(categoryTasks[category]!);
+    String? currentTask = _pickRandomTask(tasks);
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(category),
+              content: currentTask == null
+                  ? const Text("No more tasks available!")
+                  : AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: Card(
+                        key: ValueKey(currentTask),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        margin: const EdgeInsets.all(8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            currentTask!,
+                            style: const TextStyle(fontSize: 18),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text("Close"),
+                ),
+                if (currentTask != null)
+                  ElevatedButton(
+                    onPressed: () {
+                      // Pick next task
+                      setState(() {
+                        currentTask = _pickRandomTask(tasks);
+                      });
+                    },
+                    child: const Text("Next Task"),
+                  ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  static String? _pickRandomTask(List<String> tasks) {
+    if (tasks.isEmpty) return null;
+    final randomIndex = Random().nextInt(tasks.length);
+    final chosenTask = tasks[randomIndex];
+    tasks.removeAt(randomIndex); // remove chosen to avoid repetition
+    return chosenTask;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Display categories as Chips inside a Wrap
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Keyword Obsession'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Consumer<SettingsModel>(builder: (context, settingModels, _) {
+          return Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children:
+                settingModels.categories.where((e) => e.isSelected).map((cat) {
+              return ActionChip(
+                label: Text(cat.name),
+                onPressed: () => _showTasksDialog(
+                    context, cat.name, settingModels.generateCategoryTasks()),
+              );
+            }).toList(),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/routes/kinks.dart
+==============================================================================
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/responsive.dart';
+import 'package:curve/services/settings_model.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class Kinks extends StatelessWidget {
+  const Kinks({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<SettingsModel, ColorsProvider>(
+        builder: (context, categoryProvider, colorP, _) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Kinks"),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: Text(
+                '${categoryProvider.selectedItem()}/${categoryProvider.categories.length} selected.',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelMedium!
+                    .copyWith(color: Colors.grey),
+              ),
+            ),
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: Responsive.isMobile(context) ? 2 : 6,
+                crossAxisSpacing: Responsive.isMobile(context) ? 10.0 : 7,
+                mainAxisSpacing: Responsive.isMobile(context) ? 10.0 : 7,
+                childAspectRatio: 4),
+            itemCount: categoryProvider.categories.length,
+            itemBuilder: (context, index) {
+              return _buildCategoryToggle(categoryProvider.categories[index],
+                  context, colorP.seedColorColor());
+            },
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildCategoryToggle(
+      Category category, BuildContext context, Color color) {
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          // ignore: deprecated_member_use
+          color: color.withOpacity(0.4)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              width: Responsive.isMobile(context)
+                  ? MediaQuery.of(context).size.width * 0.25
+                  : MediaQuery.of(context).size.width * 0.07,
+              child: AutoSizeText(
+                category.name,
+                maxLines: 5,
+              ),
+            ),
+            Switch(
+              value: category.isSelected,
+              onChanged: (bool value) {
+                Provider.of<SettingsModel>(context, listen: false)
+                    .toggleCategory(category.name);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/routes/settings.dart
+==============================================================================
+import 'package:curve/services/colors_provider.dart';
+import 'package:curve/auth/auth.dart';
+import 'package:curve/routes/feedback.dart';
+import 'package:curve/routes/kinks.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class Settings extends StatelessWidget {
+  const Settings({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Settings"),
+      ),
+      body: Consumer<ColorsProvider>(builder: (context, colorPr, _) {
+        return CustomScrollView(
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  CupertinoFormSection(
+                      backgroundColor: colorPr.getScaffoldColor(),
+                      decoration: BoxDecoration(
+                        color: colorPr.getAppBarColor(),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      header: const Text("App Settings"),
+                      children: [
+                        CupertinoFormRow(
+                          prefix: Row(
+                            children: [
+                              Icon(colorPr.darkMode
+                                  ? CupertinoIcons.light_max
+                                  : CupertinoIcons.light_min),
+                              const SizedBox(width: 10),
+                              Text(colorPr.darkMode
+                                  ? "Switch Light Mode "
+                                  : "Switch Dark Mode"),
+                            ],
+                          ),
+                          child: CupertinoSwitch(
+                            value: colorPr.darkMode,
+                            onChanged: (value) => colorPr.setDarkMode(value),
+                          ),
+                        ),
+                        CupertinoFormRow(
+                          prefix: Row(
+                            children: [
+                              Icon(
+                                CupertinoIcons.eye,
+                              ),
+                              SizedBox(width: 10),
+                              Text('Kinks'),
+                            ],
+                          ),
+                          child: CupertinoButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (ctx) => Kinks(),
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: const Icon(CupertinoIcons.chevron_forward),
+                          ),
+                        ),
+                        CupertinoFormRow(
+                          prefix: const Row(
+                            children: [
+                              Icon(
+                                CupertinoIcons.at,
+                              ),
+                              SizedBox(width: 10),
+                              Text("Feedback"),
+                            ],
+                          ),
+                          child: CupertinoButton(
+                              onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (ctx) => FeedbackPage(),
+                                    ),
+                                  ),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child:
+                                  const Icon(CupertinoIcons.chevron_forward)),
+                        ),
+                        CupertinoFormRow(
+                          prefix: const Row(
+                            children: [
+                              Icon(
+                                CupertinoIcons.lock,
+                              ),
+                              SizedBox(width: 10),
+                              Text("Data & Privacy"),
+                            ],
+                          ),
+                          child: CupertinoButton(
+                              onPressed: () {},
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child:
+                                  const Icon(CupertinoIcons.chevron_forward)),
+                        ),
+                        CupertinoFormRow(
+                          prefix: const Row(
+                            children: [
+                              Icon(CupertinoIcons.globe,
+                                  color: CupertinoColors.activeGreen),
+                              SizedBox(width: 10),
+                              Text("Languages"),
+                            ],
+                          ),
+                          child: CupertinoButton(
+                              onPressed: () {},
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child:
+                                  const Icon(CupertinoIcons.chevron_forward)),
+                        ),
+                      ]),
+                  CupertinoFormSection(
+                      backgroundColor: colorPr.getScaffoldColor(),
+                      decoration: BoxDecoration(
+                        color: colorPr.getAppBarColor(),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      header: const Text("Help"),
+                      children: [
+                        CupertinoFormRow(
+                          prefix: const Row(
+                            children: [
+                              Icon(
+                                CupertinoIcons.exclamationmark_triangle,
+                              ),
+                              SizedBox(width: 10),
+                              Text("Report"),
+                            ],
+                          ),
+                          child: CupertinoButton(
+                              onPressed: () {},
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child:
+                                  const Icon(CupertinoIcons.chevron_forward)),
+                        ),
+                        CupertinoFormRow(
+                          prefix: const Row(
+                            children: [
+                              Icon(
+                                CupertinoIcons.waveform,
+                              ),
+                              SizedBox(width: 10),
+                              Text("Logout"),
+                            ],
+                          ),
+                          child: Consumer<AuthProvider>(
+                              builder: (context, auth, _) {
+                            return CupertinoButton(
+                                onPressed: () {
+                                  auth.signout();
+                                  Navigator.pop(context);
+                                },
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                child: const Text("Exit"));
+                          }),
+                        ),
+                        CupertinoFormRow(
+                          prefix: const Row(
+                            children: [
+                              Icon(CupertinoIcons.delete,
+                                  color: CupertinoColors.destructiveRed),
+                              SizedBox(width: 10),
+                              Text("Delete Account"),
+                            ],
+                          ),
+                          child: CupertinoButton(
+                              onPressed: () {},
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child: const Text("Proceed")),
+                        )
+                      ]),
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+}
+
+
+==============================================================================
+FILE: lib/services/colors_provider.dart
+==============================================================================
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class ColorsProvider extends ChangeNotifier {
+  ColorsProvider() {
+    darkModeToggle();
+  }
+  bool _darkMode = true;
+  bool get darkMode => _darkMode;
+  void darkModeToggle() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    _darkMode = pref.getBool("mode") ?? true;
+    notifyListeners();
+  }
+
+  void setDarkMode(bool value) async {
+    _darkMode = !_darkMode;
+    notifyListeners();
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setBool("mode", _darkMode);
+  }
+
+  Color getScaffoldColor() {
+    if (darkMode) {
+      return Color(0xff101010);
+    }
+    return CupertinoColors.white;
+  }
+
+  Color getAppBarColor() {
+    if (darkMode) {
+      return CupertinoColors.black;
+    }
+    return CupertinoColors.secondarySystemBackground;
+  }
+
+  Color navBarIconActiveColor() {
+    if (darkMode) {
+      return CupertinoColors.white;
+    }
+    return CupertinoColors.black;
+  }
+
+  Color primaryColor() {
+    if (darkMode) {
+      return CupertinoColors.systemBlue;
+    }
+    return CupertinoColors.systemBlue;
+  }
+
+  Color seedColorColor() {
+    if (darkMode) {
+      return CupertinoColors.activeBlue;
+    }
+    return CupertinoColors.activeBlue;
+  }
+
+  Brightness getBrightness() {
+    if (darkMode) {
+      return Brightness.dark;
+    }
+    return Brightness.light;
+  }
+
+  Color diceColor() {
+    if (darkMode) {
+      return CupertinoColors.secondarySystemBackground;
+    }
+    return CupertinoColors.darkBackgroundGray;
+  }
+
+  Color cellColor() {
+    if (darkMode) {
+      return Colors.black54;
+    }
+    return Colors.blue.shade50;
+  }
+
+  Color placeHolders() {
+    if (darkMode) {
+      return CupertinoColors.placeholderText;
+    }
+    return CupertinoColors.extraLightBackgroundGray;
+  }
+
+  Color playerCell(String key) {
+    /// "s" for same cell, "f" for female, "m" for male
+    if (darkMode) {
+      switch (key) {
+        case "s":
+          return Colors.blue.shade900;
+        case "m":
+          return Colors.pink.shade900;
+        case "f":
+          return Colors.purple.shade900;
+      }
+    } else {
+      switch (key) {
+        case "s":
+          return Colors.blue.shade100;
+        case "m":
+          return Colors.pink.shade100;
+        case "f":
+          return Colors.purple.shade100;
+      }
+    }
+    return Colors.transparent;
+  }
+
+  Color playerIcons(String key) {
+    /// "s" for same cell, "f" for female, "m" for male
+    if (darkMode) {
+      switch (key) {
+        case "s":
+          return Colors.blue.shade100;
+        case "m":
+          return Colors.pink.shade100;
+        case "f":
+          return Colors.purple.shade100;
+      }
+    } else {
+      switch (key) {
+        case "s":
+          return Colors.blue.shade900;
+        case "m":
+          return Colors.pink.shade900;
+        case "f":
+          return Colors.purple.shade900;
+      }
+    }
+    return Colors.red.shade900;
+  }
+
+  Color scratchCard() {
+    if (darkMode) {
+      return CupertinoColors.inactiveGray;
+    }
+    return CupertinoColors.systemGrey5;
+  }
+
+  List<List<Color>> getGradients() {
+    if (darkMode) {
+      return [
+        [
+          CupertinoColors.activeBlue.withOpacity(0.1),
+          CupertinoColors.darkBackgroundGray
+        ],
+        [
+          CupertinoColors.systemPurple,
+          CupertinoColors.black,
+        ],
+      ];
+    }
+    return [
+      [
+        CupertinoColors.activeBlue,
+        CupertinoColors.secondarySystemBackground
+      ],
+      [
+        CupertinoColors.systemPurple,
+        CupertinoColors.extraLightBackgroundGray,
+      ],
+    ];
+  }
+  Color lodingColor(){
+    if(darkMode){
+      return CupertinoColors.activeBlue;
+    }
+    return Colors.black;
+  }
+
+  Color taskCard(){
+    if(darkMode){
+      return CupertinoColors.darkBackgroundGray;
+    }
+    return CupertinoColors.extraLightBackgroundGray;
+  }
+}
+
+
+==============================================================================
+FILE: lib/services/movie_api.dart
+==============================================================================
+import 'package:curve/models/movie_model.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class MovieApi {
+  List<String> movies = [
+    // Soft Romance
+    "Call Me By Your Name",
+    "In The Mood For Love",
+    "Lost in Translation",
+    "Amélie",
+    "Carol",
+    "A Single Man",
+    "Weekend",
+    "Bridgerton",
+    "Portrait of a Lady on Fire",
+    "Crazy Rich Asians",
+    "About Time",
+    "La La Land",
+    "500 Days of Summer",
+    "Pride & Prejudice",
+    "Sleepless in Seattle",
+    // Romantic & Sensual
+    "Y Tu Mamá También",
+    "Out of Sight",
+    "The Piano",
+    "Belle de Jour",
+    "Mr. & Mrs. Smith",
+    "Body Heat",
+    "The Lover",
+    "Chloe",
+    // Erotic
+    "Wild Orchid",
+    "9 1/2 Weeks",
+    "Emmanuelle",
+    "Basic Instinct",
+    "Secretary",
+    "Below Her Mouth",
+    "Love",
+    "The Last Seduction",
+    "The Dreamers",
+    "Little Ashes",
+    // Intense Desire & Eroticism
+    "Fifty Shades of Grey",
+    "Fifty Shades Darker",
+    "Fifty Shades Freed",
+    "365 Days",
+    "365 Days: This Day",
+    "365 Days: The Next 365 Days",
+    "After",
+    "After We Collided",
+    "After We Fell",
+    "After Ever Happy",
+    "Shame",
+    "Eyes Wide Shut",
+
+    // Strong Fantasy & Sexual Exploration
+    "The Handmaiden",
+    "Fatal Attraction",
+    "Cruel Intentions",
+    "American Beauty",
+    "Audition",
+    "Irreversible",
+    "Teorema",
+    "Taxidermia",
+  ];
+  Future<List<Movie>> fetchMovies(String movieName) async {
+    final url = Uri.parse(
+        'https://www.omdbapi.com/?s=$movieName&type=movie&apikey=be5a1360');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['Search'] != null) {
+        return List<Movie>.from(data['Search'].map((e) => Movie.fromJson(e)));
+      } else {
+        return [];
+      }
+    } else {
+      throw Exception('Failed to load movies');
+    }
+  }
+
+  Future<Movie> fetchMovieDetails(String movieId) async {
+    final url =
+        Uri.parse('https://www.omdbapi.com/?i=$movieId&apikey=be5a1360');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return Movie.fromJson(data);
+    } else {
+      throw Exception('Failed to load movies');
+    }
+  }
+}
+
+
+==============================================================================
+FILE: lib/services/gird_provider.dart
+==============================================================================
+import 'dart:math';
+
+import 'package:curve/logs/grid_tasks.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+class GameProvider extends ChangeNotifier {
+  int player1Position = 1; // We'll treat these as 1-based board positions.
+  int player2Position = 1;
+  int currentPlayer = 1; // 1 or 2
+  static List<String> starterTasks = [
+    "Look deeply into each other's eyes and silently communicate your feelings.",
+    "Synchronize your breathing, inhaling and exhaling together for a few moments.",
+    "Give your partner a gentle, affirming touch that communicates appreciation.",
+    "Whisper a simple desire or something you find attractive about your partner into their ear.",
+    "Tell your partner what you admire about them the most, and hold their hand.",
+    "Gently caress your partner’s arm, back or neck with soft, slow movements.",
+    "Give a tender kiss to any body part that you find appealing.",
+    "Share a cherished memory with your partner, focusing on the emotional connection.",
+    "Tell your partner what is your favorite feature on their body",
+    "Share 3 things you love about the other person",
+  ];
+  String task = "Before Rolling Dice: ${starterTasks[0]}";
+  void reset() {
+    player1Position = 1; // We'll treat these as 1-based board positions.
+    player2Position = 1;
+    currentPlayer = 1; // 1 or 2
+    task =
+        "Before Rolling Dice: ${starterTasks[Random().nextInt(starterTasks.length)]}";
+    notifyListeners();
+  }
+
+  // Asynchronously move the current player step-by-step
+  Future<void> advancePlayer(int steps) async {
+    if ((player1Position == 30) || (player2Position == 30)) {
+      return;
+    }
+
+    for (int i = 0; i < steps; i++) {
+      if (currentPlayer == 1) {
+        player1Position++;
+        if (player1Position > 30) player1Position = 30;
+      } else {
+        player2Position++;
+        if (player2Position > 30) player2Position = 30;
+      }
+
+      notifyListeners();
+      // Wait a bit to simulate sliding (step-by-step movement)
+      await Future.delayed(const Duration(milliseconds: 200));
+    }
+
+    // After finishing movement, check for collision
+    if (player1Position == player2Position && player1Position != 1) {
+      // Both players on same cell, knock out the occupant
+      // The occupant is considered the player who was there first.
+      // For simplicity: The newly arrived player knocks out the other.
+      // Which player arrived last? The current player just moved, so they are the "arriver".
+      // The other player gets knocked back to start:
+      // Kiss each other looking into the eyes.
+      task =
+          "Let your eyes meet and then let your tongue slide over their lips.";
+      notifyListeners();
+    } else {
+      String text = gridCells[player1Position]![Random().nextInt(4)];
+      if (player1Position > player2Position) {
+        task = generateTaskMessages("Male", text)[player1Position] ?? "";
+        notifyListeners();
+      } else {
+        task = generateTaskMessages("Female", text)[player2Position] ?? "";
+        notifyListeners();
+      }
+    }
+    // Switch player turn
+    currentPlayer = (currentPlayer == 1) ? 2 : 1;
+    notifyListeners();
+  }
+}
+
+
+==============================================================================
+FILE: lib/services/settings_model.dart
+==============================================================================
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class SettingsModel extends ChangeNotifier {
+  SettingsModel() {
+    fill();
+  }
+ 
+  void fill() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    _categories = initialCategories.map((name) {
+      bool getInital = pref.getBool(name) ?? true;
+      return Category(name: name, isSelected: getInital);
+    }).toList();
+    defautlSpeed =
+        pref.getString("game_speed_limit_str") ?? "25 Question per level";
+    notifyListeners();
+  }
+
+  List<Category> _categories = [];
+  String defautlSpeed = "";
+  List<String> gameSpeed = [
+    "25 Question per level",
+    "15 Question per level",
+    "10 Question per level",
+    "5  Question per level",
+    "1  Question per level",
+  ];
+  void setGameSpeed(String e) async {
+    defautlSpeed = e;
+    notifyListeners();
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    await pref.setString("game_speed_limit_str", defautlSpeed);
+  }
+
+  List<String> initialCategories = [
+    'Bondage',
+    'Toys',
+    'Dominance/Submission',
+    'Oral',
+    'Spanking',
+    'Food',
+    'Teasing/Denial',
+    'Anal',
+    'Massage',
+    'Kiss',
+    'Feet',
+    'Music',
+    'Tantra',
+    'Roleplay',
+    'Sensory Deprivation',
+    'Alcohol',
+    'Photo/Video',
+    'Porn',
+    'Lipstick',
+    'Penetration',
+    'Masturbation',
+    'Lingerie',
+    'Body Writing',
+    'Breath Play',
+    'Hair Play',
+    'Scent Play',
+    'Fantasy Sharing',
+    'Tickling',
+    'Storytelling',
+    'Striptease',
+    'Gamer',
+    'Nature',
+    'Voyeurism',
+    'Exhibitionism',
+    'Choking',
+    'Light bondage',
+  ];
+
+  Map<String, List<String>> generateCategoryTasks() {
+    Map<String, List<String>> categoryTasks = {};
+    for (var category in categories) {
+      if (category.isSelected) {
+        switch (category.name) {
+          case 'Bondage':
+            categoryTasks[category.name] = [
+              'Try tying each other’s hands with soft cloth',
+              'Explore light bondage with your partner, using only rope',
+              'Use a blindfold for your partner and have them guess where you touch them',
+              'Have your partner choose a bondage item that you will wear',
+              'Incorporate a full bondage session with safeword.',
+            ];
+            break;
+          case 'Toys':
+            categoryTasks[category.name] = [
+              'Explore a toy that you do not usually use with your partner',
+              'Have your partner chose a toy they want to use on you',
+              'Try using only one type of toy during a love making session',
+              'Use the toy as a source of teasing and denial',
+              'Create a game with a toy for the enjoyment of both of you.',
+            ];
+            break;
+          case 'Dominance/Submission':
+            categoryTasks[category.name] = [
+              'Have your partner guide you with an erotic command',
+              'Have your partner roleplay as a person that is in a position of power',
+              'Allow your partner to explore the limits that you have set for your submissive side.',
+              'Try a session where your partner has full control over your body',
+              'Incorporate dominance/submission in a role-playing session.',
+            ];
+            break;
+          case 'Oral':
+            categoryTasks[category.name] = [
+              'Have your partner gently kiss your lips',
+              'Have your partner slowly lick your neck',
+              'Allow your partner to explore your body with their tongue.',
+              'Allow your partner to orally explore your body while you are blindfolded.',
+              'Have an oral session using a blindfold and explore different tastes',
+            ];
+            break;
+          case 'Spanking':
+            categoryTasks[category.name] = [
+              'Try gently tapping your partner’s body',
+              'Have your partner trace your body using their palm',
+              'Have your partner play with your skin with soft pressure',
+              'Use your hand to tap your partner while you whisper a naughty word',
+              'Use a spanking session as a source of foreplay.',
+            ];
+            break;
+          case 'Food':
+            categoryTasks[category.name] = [
+              'Have your partner taste you with a sweet treat.',
+              'Have your partner lick honey off a part of your body',
+              'Have your partner put a piece of food in your mouth while blindfolded',
+              'Use different textures of food to explore each other’s skin',
+              'Have a full body food massage.',
+            ];
+            break;
+          case 'Teasing/Denial':
+            categoryTasks[category.name] = [
+              'Tease your partner without touching them',
+              'Slowly remove one piece of clothing from your partner',
+              'Touch your partner everywhere except for their erogenous zones',
+              'Use your mouth to kiss your partner on their body but stopping before getting to erogenous zones',
+              'Deny your partner any physical touch for 5 minutes after having them at their edge.',
+            ];
+            break;
+          case 'Anal':
+            categoryTasks[category.name] = [
+              'Explore your partners anal area gently with fingers',
+              'Use a toy to explore your partner anal area with a light touch',
+              'Ask your partner to describe what they like about anal stimulation',
+              'Use your tongue to explore your partner’s anal area',
+              'Have an anal sex session using a lubricant',
+            ];
+            break;
+          case 'Massage':
+            categoryTasks[category.name] = [
+              'Give your partner a relaxing hand massage.',
+              'Massage your partners back using sensual strokes',
+              'Give your partner a full body massage using oil or lotion',
+              'Have your partner lie in bed while you use different textures to massage them',
+              'Have your partner guide your massage to their erogenous zones',
+            ];
+            break;
+          case 'Kiss':
+            categoryTasks[category.name] = [
+              'Give your partner a soft kiss on the lips',
+              'Explore the different parts of your partner’s face while kissing them.',
+              'Use your tongue to slowly explore your partner’s mouth',
+              'Kiss your partner’s body starting from the neck to the belly button',
+              'Have a deep and sensual kiss with your partner that leads to further exploration.',
+            ];
+            break;
+          case 'Feet':
+            categoryTasks[category.name] = [
+              'Let your partner touch your feet gently with their fingers',
+              'Let your partner massage your feet with oil or lotion',
+              'Have your partner explore your feet with their mouth',
+              'Have your partner use different textures on your feet to explore',
+              'Have your partner draw on your feet with their fingers or a toy',
+            ];
+            break;
+          case 'Music':
+            categoryTasks[category.name] = [
+              'Put on music that you and your partner enjoy and move your body together',
+              'Create a playlist for your partner that you think they will like during intimacy',
+              'Put on a song and have your partner create a striptease based on it',
+              'Let your partner put on a song that they want to listen to during intimacy',
+              'Listen to a sensual song with your partner and try to communicate your feelings without words',
+            ];
+            break;
+          case 'Tantra':
+            categoryTasks[category.name] = [
+              'Try a tantric breathing technique with your partner in bed.',
+              'Explore the concept of dual energy with your partner',
+              'Have your partner guide you using the principles of tantric sexuality.',
+              'Try a tantric meditation with your partner',
+              'Share a tantric practice and learn a new sensual practice',
+            ];
+            break;
+          case 'Roleplay':
+            categoryTasks[category.name] = [
+              'Have your partner dress as a character and then you describe how you feel',
+              'Have your partner use their hands and voice as they portray a character during sex',
+              'Have your partner chose a character and act out your favorite sexual scenario',
+              'Try to add lines from a movie to enhance a sexual encounter using a character',
+              'Explore roleplay in bed using props and costumes',
+            ];
+            break;
+          case 'Sensory Deprivation':
+            categoryTasks[category.name] = [
+              'Use a blindfold with your partner and then ask them to describe their surroundings with your touch',
+              'Put on a blindfold for your partner and use different textures to touch them on their skin',
+              'Put on earplugs and have your partner explore your body with their mouth',
+              'Create a sensory deprivation experience by putting on blindfold and earplugs to your partner',
+              'Explore with sounds and touch while your partner has their eyes closed',
+            ];
+            break;
+          case 'Alcohol':
+            categoryTasks[category.name] = [
+              'Have a drink while you explore each other’s bodies with your hands',
+              'Drink while you describe what is the best part of your partner',
+              'Have your partner drink something and describe how they feel after drinking it.',
+              'Have a glass of wine while making love',
+              'Use a cocktail as a source of teasing and denial',
+            ];
+            break;
+          case 'Photo/Video':
+            categoryTasks[category.name] = [
+              'Have your partner take a picture of your face after an orgasm',
+              'Take a full body photo of your partner in bed while they are wearing something sexy',
+              'Take a video together while having sex',
+              'Take a video of your partner while you describe their beauty.',
+              'Take turns directing how the other person should take the photo or video',
+            ];
+            break;
+          case 'Porn':
+            categoryTasks[category.name] = [
+              'Choose a scene and act it out using the position, the moves, and the pace',
+              'Have your partner choose a type of porn and describe how they feel about it',
+              'Choose a pornographic movie and explore each other while watching it',
+              'Choose a pornographic movie and do a roleplay with your partner',
+              'Have your partner choose a porn and describe what they would change about it',
+            ];
+            break;
+          case 'Lipstick':
+            categoryTasks[category.name] = [
+              'Have your partner apply lipstick on your lips',
+              'Kiss your partner leaving a mark on their body.',
+              'Have your partner use the lipstick on their body to write a message.',
+              'Use the lipstick to create a drawing on your body',
+              'Have your partner apply lipstick to your genitals',
+            ];
+            break;
+          case 'Penetration':
+            categoryTasks[category.name] = [
+              'Have slow penetration while looking each other in the eyes',
+              'Focus on the sensation of penetration, and use only that to reach orgasm',
+              'Do not allow any touching or kissing only penetration to enhance the pleasure',
+              'Use penetration in a position that is unusual and try to focus on the pleasure only',
+              'Incorporate penetration while using a toy',
+            ];
+            break;
+          case 'Masturbation':
+            categoryTasks[category.name] = [
+              'Masturbate slowly while your partner watches you from afar',
+              'Guide your partner while they masturbate and touch you with their hands.',
+              'Masturbate while your partner touches you and use their feedback to your masturbation',
+              'Let your partner describe to you what is hot to watch, while they are watching you masturbate',
+              'Use a toy to masturbate while your partner focuses on your pleasure',
+            ];
+            break;
+          case 'Lingerie':
+            categoryTasks[category.name] = [
+              'Choose a lingerie for your partner and let them try it on',
+              'Let your partner choose your lingerie and show it to them while you are in bed',
+              'Tell your partner what makes you feel horny when you wear lingerie',
+              'Choose a piece of lingerie for you to wear while you have sex.',
+              'Have your partner buy you a piece of lingerie that you would like to wear',
+            ];
+            break;
+          case 'Body Writing':
+            categoryTasks[category.name] = [
+              'Write a message on your partner using a feather or a brush',
+              'Use oil or lotion to draw a simple image on your partner’s body',
+              'Use your tongue to write on your partner’s body',
+              'Use different textures to write messages on your partners body',
+              'Ask your partner to describe how they feel when you write on their body',
+            ];
+            break;
+          case 'Breath Play':
+            categoryTasks[category.name] = [
+              'Have your partner breathe on your neck or erogenous zones.',
+              'Have your partner use only their breath to stimulate you',
+              "Explore the pleasure of your breath on your partner's body",
+              'Focus on your breathing during sex with your partner',
+              'Use your breath to guide your partner into your sexual space',
+            ];
+            break;
+          case 'Hair Play':
+            categoryTasks[category.name] = [
+              'Have your partner play with your hair using their hands',
+              'Have your partner lick your hair and explore the different textures',
+              'Have your partner pull your hair with different intensity and directions',
+              'Have your partner touch your hair slowly while looking at your eyes',
+              'Have your partner create a sensual massage using your hair',
+            ];
+            break;
+          case 'Scent Play':
+            categoryTasks[category.name] = [
+              'Have your partner use a sensual scent on your body.',
+              'Put a scented oil on your hands and have your partner explore your skin',
+              'Let your partner discover your favorite scent and use it during intimacy',
+              'Use different textures while exploring scents',
+              'Have your partner use the scents to make you feel different emotions.',
+            ];
+            break;
+          case 'Fantasy Sharing':
+            categoryTasks[category.name] = [
+              'Have your partner describe your favorite fantasy while touching you',
+              'Describe to your partner one of your deepest fantasies and act it out',
+              'Describe a fantasy that you have never told anyone before and then act it out',
+              'Share a fantasy with your partner and see if they enjoy it',
+              'Create a fantasy together and act it out',
+            ];
+            break;
+          case 'Tickling':
+            categoryTasks[category.name] = [
+              'Use soft tickling motions in sensitive parts of the body',
+              'Ask your partner to tickle you to increase your heart rate',
+              'Have your partner tickle your feet and see how you react to it',
+              'Let your partner tickle you everywhere, but only for a certain period',
+            "Tickle a part of your partner's body and describe your sensation",
+            ];
+            break;
+          case 'Storytelling':
+            categoryTasks[category.name] = [
+              'Have your partner tell you a story that makes you feel horny.',
+              'Have your partner read you a sensual story while you touch them.',
+              'Have your partner describe a sexual encounter using a story format',
+              'Create a story together that will enhance your pleasure',
+              'Write a story together and then act it out',
+            ];
+            break;
+          case 'Striptease':
+            categoryTasks[category.name] = [
+              'Have your partner slowly remove one piece of clothing to seduce you',
+              'Have your partner do a striptease while you blindfold yourself and then remove it',
+              'Tell your partner what you would like them to wear during a striptease',
+              'Tell your partner to do a striptease according to a music you choose',
+              'Create a striptease together while exploring your bodies',
+            ];
+            break;
+          case 'Gamer':
+            categoryTasks[category.name] = [
+              'Play a game of your choice while exploring your partners body with your hands',
+              'Play a game and reward or punish each other based on the result',
+              'Play a video game together and incorporate a touch session',
+              'Create a board game or a role-playing game that will enhance the intensity of your session',
+              'Create a game where you have to undress each other during gameplay',
+            ];
+            break;
+          case 'Nature':
+            categoryTasks[category.name] = [
+              'Take each other for a walk in nature while holding hands',
+              'Have sex in nature while listening to the sound of your surroundings',
+              'Take a bath in nature and explore your bodies while you are in water',
+              'Use the nature surrounding you to discover new ways of exploring each other',
+              'Let the nature inspire your sensuality',
+            ];
+            break;
+          case 'Voyeurism':
+            categoryTasks[category.name] = [
+              'Have your partner watch you in a mirror while you are masturbating',
+              'Have your partner watch you while you are undressing yourself',
+              'Have your partner film you while you are getting pleasure.',
+              'Let your partner look at you while you are taking a bath or a shower',
+              'Create an experience where you are being observed by your partner',
+            ];
+            break;
+          case 'Exhibitionism':
+            categoryTasks[category.name] = [
+              'Masturbate in front of your partner and allow them to enjoy your body',
+              'Have a full body photoshoot and share it with your partner.',
+              'Expose yourself to your partner and have them describe what is it that they like about you',
+              'Show your body to your partner while performing a striptease',
+              'Have a date with your partner while doing sensual activities in public'
+            ];
+            break;
+          case 'Choking':
+            categoryTasks[category.name] = [
+              'Use a scarf to gently put pressure on your partners neck and describe the sensations',
+              'Have your partner describe the sensation when you put pressure on their neck while kissing them',
+              'Have your partner put pressure on your neck while you are kissing them',
+              'Explore light choking as a way to intensify the pleasure with your partner',
+              'Use a blindfold while you are applying pressure to your partner’s neck',
+            ];
+            break;
+          case 'Light bondage':
+            categoryTasks[category.name] = [
+              'Use soft cloth to restrain your partner’s hands while exploring them',
+              'Tie your partner to the bed and kiss them while you have full control over their body',
+              'Use rope to tie your partner legs and explore them while they are tied',
+              'Use different materials while you are tying your partner to increase stimulation',
+              'Have your partner tie you and lead the way for exploration',
+            ];
+            break;
+
+          default:
+            categoryTasks[category.name] = [
+              "Try a new intimate activity tonight related to ${category.name}.",
+              "Discuss fantasies involving ${category.name}.",
+              "Purchase a new accessory related to ${category.name}.",
+              "Explore a new position or scenario themed around ${category.name}.",
+              "Spend 10 minutes focusing solely on ${category.name}-inspired sensations.",
+            ];
+        }
+      }
+    }
+    return categoryTasks;
+  }
+
+  List<Category> get categories => _categories;
+
+  int selectedItem() => _categories.where((i) => i.isSelected == true).length;
+
+  void toggleCategory(String categoryName) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    for (var category in _categories) {
+      if (category.name == categoryName) {
+        category.isSelected = !category.isSelected;
+        await pref.setBool(category.name, category.isSelected);
+        notifyListeners();
+        return;
+      }
+    }
+  }
+}
+
+class Category {
+  final String name;
+  bool isSelected;
+
+  Category({required this.name, this.isSelected = true});
+}
+
+
+==============================================================================
+FILE: lib/services/scratch_provider.dart
+==============================================================================
+import 'package:flutter/cupertino.dart';
+import 'package:lottie/lottie.dart';
+
+class ScratchProvider extends ChangeNotifier {
+  double _scratchProgress = 0.0;
+  double get srcathcProgress => _scratchProgress;
+
+  bool _thresholdReached = false;
+  bool get thresholdReached => _thresholdReached;
+  bool animationEnded = false;
+  void updateScratchProgress(double progress) {
+    _scratchProgress = progress;
+    notifyListeners();
+  }
+
+  void setThresholdReached() {
+    _thresholdReached = true;
+    notifyListeners();
+  }
+
+  void endAnimation(LottieComposition composition) async{
+    Future.delayed(composition.duration, () {
+      animationEnded = true;
+      notifyListeners();
+    });
+  }
+
+  void resetProgress() {
+    _scratchProgress = 0.0;
+    _thresholdReached = false;
+    animationEnded = false;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _scratchProgress = 0.0;
+    _thresholdReached = false;
+    animationEnded = false;
+    super.dispose();
+  }
+}
+
+
+==============================================================================
+FILE: lib/services/cart_provider.dart
+==============================================================================
+import 'package:flutter/cupertino.dart';
+
+class CartProvider extends ChangeNotifier {
+  List<Item> itemsCart = [];
+  List<Item> items = [
+    Item(
+      name: "Holiday Gift Basket",
+      price: 80.00,
+      productImg:
+          "https://images.pexels.com/photos/27393960/pexels-photo-27393960/free-photo-of-present-basket-with-a-ribbon-champagne-and-chocolate-sweets-on-a-dark-background.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    ),
+    Item(
+      name: "Luxury Gift Set",
+      price: 150.00,
+      productImg:
+          "https://images.pexels.com/photos/6832992/pexels-photo-6832992.jpeg?auto=compress&cs=tinysrgb&w=600",
+    ),
+    Item(
+      name: "Birthday Gift Box",
+      price: 40.00,
+      productImg:
+          "https://images.pexels.com/photos/931176/pexels-photo-931176.jpeg?auto=compress&cs=tinysrgb&w=600",
+    ),
+    Item(
+      name: "Wedding Gift Set",
+      price: 200.00,
+      productImg:
+          "https://images.pexels.com/photos/11952736/pexels-photo-11952736.jpeg?auto=compress&cs=tinysrgb&w=600",
+    ),
+    Item(
+      name: "Anniversary Gift Box",
+      price: 120.00,
+      productImg:
+          "https://images.pexels.com/photos/1927260/pexels-photo-1927260.jpeg?auto=compress&cs=tinysrgb&w=600",
+    ),
+    Item(
+      name: "Valentine's Day Gift Set",
+      price: 90.00,
+      productImg:
+          "https://images.pexels.com/photos/20192810/pexels-photo-20192810/free-photo-of-miniature-pink-car.jpeg?auto=compress&cs=tinysrgb&w=600",
+    ),
+    Item(
+      name: "Mother's Day Gift Box",
+      price: 70.00,
+      productImg:
+          "https://images.pexels.com/photos/7763944/pexels-photo-7763944.jpeg?auto=compress&cs=tinysrgb&w=600",
+    ),
+  ];
+
+  void addItems(Item item) {
+    itemsCart.add(item);
+    notifyListeners();
+  }
+
+  bool serchItem(Item item) {
+    return itemsCart.contains(item);
+  }
+
+  void removeItem(Item item) {
+    itemsCart.remove(item);
+    notifyListeners();
+  }
+}
+
+class Item {
+  final String name;
+  final num price;
+  final String productImg;
+
+  Item({required this.name, required this.price, required this.productImg});
+}
+
+
+==============================================================================
+FILE: lib/services/learn_provider.dart
+==============================================================================
+import 'package:curve/models/learn_model.dart';
+import 'package:curve/services/db.dart';
+import 'package:flutter/material.dart';
+
+class LearnProvider extends ChangeNotifier {
+  final DatabaseService _db = DatabaseService();
+
+  LearnProvider() {
+    getArticles();
+  }
+
+  List<Article> articles = [];
+  bool isLoading = false;
+
+  void getArticles() async {
+    isLoading = true;
+    // notifyListeners(); // Optional: trigger loading state in UI if needed
+
+    try {
+      List<Article> fetchedArticles = await _db.getArticles();
+      articles = fetchedArticles;
+      articles.sort((a, b) => a.id.compareTo(b.id));
+      notifyListeners();
+    } catch (e) {
+      print('Error fetching articles: $e');
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> getArticle(Article article) async {
+    try {
+      List<SectionsReadings> sections = await _db.getSections(article.id);
+      article.sections = sections;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('Error fetching sections for article ${article.id}: $e');
+      return false;
+    }
+  }
+}
+
+
+==============================================================================
+FILE: lib/services/responsive.dart
+==============================================================================
+import 'package:flutter/cupertino.dart';
+
+class Responsive extends StatelessWidget {
+  final Widget mobile;
+  final Widget desktop;
+
+  const Responsive({super.key, required this.mobile, required this.desktop});
+
+  static bool isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < 940;
+  static bool isDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= 940;
+
+  @override
+  Widget build(BuildContext context) {
+    final Size size = MediaQuery.sizeOf(context);
+    if (size.width >= 940) {
+      return desktop;
+    } else {
+      return mobile;
+    }
+  }
+}
+
+
+==============================================================================
+FILE: lib/services/state.dart
+==============================================================================
+import 'package:flutter/material.dart';
+
+class NavBar extends ChangeNotifier {
+  int idx = 0;
+  void change(int i) {
+    idx = i;
+    notifyListeners();
+  }
+}
+
+
+==============================================================================
+FILE: lib/services/db.dart
+==============================================================================
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curve/models/learn_model.dart';
+
+class DatabaseService {
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  // --- User Management ---
+  /// Creates a user document if it doesn't exist, or updates last_login if it does.
+  Future<void> createUser(String uid, String email) async {
+    try {
+      final userDoc = _db.collection('users').doc(uid);
+      final docSnapshot = await userDoc.get();
+
+      if (!docSnapshot.exists) {
+        // Create new user document
+        await userDoc.set({
+          'uid': uid,
+          'email': email,
+          'created_at': FieldValue.serverTimestamp(),
+          'last_login': FieldValue.serverTimestamp(),
+          // Add default settings or other fields here if needed
+        });
+      } else {
+        // User exists, update last_login
+        await userDoc.update({
+          'last_login': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (e) {
+      print("Error creating/updating user in Firestore: $e");
+      // Decide if you want to throw exception to block auth or just log it
+      throw Exception("Failed to save user data.");
+    }
+  }
+
+  // --- Feedback ---
+  Future<void> addFeedback({
+    required double rating,
+    required bool? isEasyToUnderstand,
+    required String improvementSuggestion,
+    required String favoriteFeature,
+    required String additionalFeedback,
+    required String userId,
+  }) async {
+    try {
+      await _db.collection('feedback').add({
+        'rating': rating,
+        'is_easy_to_understand': isEasyToUnderstand,
+        'improvement_suggestion': improvementSuggestion,
+        'favorite_feature': favoriteFeature,
+        'additional_feedback': additionalFeedback,
+        'user_id': userId,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print("Error adding feedback: $e");
+      throw Exception(e);
+    }
+  }
+
+  // --- Learn Content (Articles) ---
+  Future<List<Article>> getArticles() async {
+    try {
+      QuerySnapshot snapshot =
+          await _db.collection('articles').orderBy('id').get();
+      return snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        // If your JSON model expects 'id' to be an int, ensure Firestore stores it as number
+        return Article.fromJson(data);
+      }).toList();
+    } catch (e) {
+      print("Error getting articles: $e");
+      return [];
+    }
+  }
+
+  // --- Learn Content (Sections) ---
+  Future<List<SectionsReadings>> getSections(int articleId) async {
+    try {
+      QuerySnapshot snapshot = await _db
+          .collection('sections')
+          .where('article_id', isEqualTo: articleId)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return SectionsReadings.fromJson(data);
+      }).toList();
+    } catch (e) {
+      print("Error getting sections: $e");
+      return [];
+    }
+  }
+}
+
+
