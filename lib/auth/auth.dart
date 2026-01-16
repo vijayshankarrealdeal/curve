@@ -2,15 +2,10 @@ import 'package:curve/services/db.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'dart:async'; // For unawaited
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final DatabaseService _dbService = DatabaseService();
-
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-  bool _isGoogleSignInInitialized = false;
 
   AuthProvider() {
     initAuth();
@@ -39,11 +34,9 @@ class AuthProvider extends ChangeNotifier {
       authIsLoading = false;
       notifyListeners();
     });
-
-    // 2. Initialize Google Sign In & Listen for Events
   }
 
-  // --- Standard Email/Password Auth (Unchanged) ---
+  // --- Standard Email/Password Auth ---
   Future<void> login(String email, String password) async {
     isLoading = true;
     notifyListeners();
@@ -63,26 +56,49 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // --- Google Sign In (Web & Mobile without external package) ---
   Future<void> signInWithGoogle() async {
-    if (kIsWeb) {
-      try {
-        final provider = GoogleAuthProvider();
-        // optional scopes / params:
-        provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-        // provider.setCustomParameters({'login_hint': 'user@example.com'});
+    isLoading = true;
+    notifyListeners();
 
-        UserCredential credential =
-            await FirebaseAuth.instance.signInWithPopup(provider);
-        if (credential.user != null) {
-          await _dbService.createUser(
-              credential.user!.uid, credential.user!.email!);
-        }
-      } catch (e) {
-        print("Error during Google Sign-In on Web: $e");
+    try {
+      // 1. Create the Provider
+      GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+      // Optional: Add scopes if you need contacts or specific data
+      googleProvider.addScope('email');
+      googleProvider.setCustomParameters({'prompt': 'select_account'});
+
+      UserCredential userCredential;
+
+      if (kIsWeb) {
+        // 2. WEB: Use Popup
+        userCredential = await _firebaseAuth.signInWithPopup(googleProvider);
+      } else {
+        // 3. MOBILE (Android/iOS): Use signInWithProvider
+        // This triggers a browser-based OAuth flow (Chrome Custom Tabs / ASWebAuthenticationSession)
+        // This works NATIVELY with firebase_auth and does not require google_sign_in package.
+        userCredential = await _firebaseAuth.signInWithProvider(googleProvider);
       }
 
+      // 4. Update Database if successful
+      if (userCredential.user != null) {
+        await _dbService.createUser(
+            userCredential.user!.uid, userCredential.user!.email ?? "No Email");
+      }
+    } on FirebaseAuthException catch (e) {
+      // Handle specific Firebase errors (e.g., popup closed by user)
+      print("Firebase Google Auth Error: ${e.code} - ${e.message}");
+      if (e.code == 'web-context-cancelled' || e.code == 'canceled') {
+        throw Exception("Sign in cancelled");
+      }
+      throw Exception(e.message ?? "Google Sign-In failed");
+    } catch (e) {
+      print("General Auth Error: $e");
+      throw Exception("An unexpected error occurred during Google Sign-In");
+    } finally {
+      isLoading = false;
       notifyListeners();
-      // Or: return FirebaseAuth.instance.signInWithRedirect(provider);
     }
   }
 
@@ -110,10 +126,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> signout() async {
     try {
-      await Future.wait([
-        _firebaseAuth.signOut(),
-        if (_isGoogleSignInInitialized) _googleSignIn.signOut(),
-      ]);
+      await _firebaseAuth.signOut();
       emailController.clear();
       passwordController.clear();
       confirmPasswordController.clear();
