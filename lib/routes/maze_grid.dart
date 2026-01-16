@@ -6,12 +6,13 @@ import 'package:curve/services/gird_provider.dart';
 import 'package:curve/services/responsive.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bi.dart';
 import 'package:iconify_flutter/icons/ion.dart';
 import 'package:provider/provider.dart';
 
-// ------------------ PROVIDER ------------------
+// ------------------ MAIN WRAPPER ------------------
 
 class MazeGrid extends StatelessWidget {
   const MazeGrid({super.key});
@@ -20,13 +21,151 @@ class MazeGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final gameProvider = context.watch<GameProvider>();
 
+    // If no room ID, show Lobby
+    if (gameProvider.roomId == null) {
+      return const LobbyPage();
+    }
+
+    // If Room ID exists, show Game Board
+    return const GameBoardPage();
+  }
+}
+
+// ------------------ LOBBY PAGE ------------------
+
+class LobbyPage extends StatefulWidget {
+  const LobbyPage({super.key});
+
+  @override
+  State<LobbyPage> createState() => _LobbyPageState();
+}
+
+class _LobbyPageState extends State<LobbyPage> {
+  final TextEditingController _codeController = TextEditingController();
+  bool _isLoading = false;
+
+  void _createGame() async {
+    setState(() => _isLoading = true);
+    try {
+      await context.read<GameProvider>().createGame();
+      // Provider updates roomId, switching view to GameBoardPage automatically
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("$e")));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _joinGame() async {
+    if (_codeController.text.length != 6) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Enter a 6-digit code")));
+      return;
+    }
+    setState(() => _isLoading = true);
+    try {
+      await context.read<GameProvider>().joinGame(_codeController.text.trim());
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Error: $e")));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Intimacy Maze")),
+      body: Center(
+        child: _isLoading
+            ? const CircularProgressIndicator()
+            : Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(CupertinoIcons.game_controller_solid, size: 80),
+                    const SizedBox(height: 20),
+                    const Text("Play with your partner",
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 40),
+                    SizedBox(
+                      width: double.infinity,
+                      child: CupertinoButton.filled(
+                        onPressed: _createGame,
+                        child: const Text("Create Game"),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    const Row(children: [
+                      Expanded(child: Divider()),
+                      Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Text("OR JOIN")),
+                      Expanded(child: Divider()),
+                    ]),
+                    const SizedBox(height: 30),
+                    TextField(
+                      controller: _codeController,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      decoration: const InputDecoration(
+                        hintText: "Enter 6-digit Room Code",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: CupertinoButton(
+                        color: Colors.grey.shade300,
+                        onPressed: _joinGame,
+                        child: const Text("Join Game",
+                            style: TextStyle(color: Colors.black)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+// ------------------ GAME BOARD PAGE ------------------
+
+class GameBoardPage extends StatelessWidget {
+  const GameBoardPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final gameProvider = context.watch<GameProvider>();
+    final isWaiting = gameProvider.status == 'waiting';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Intimacy Maze"),
+        title: Column(
+          children: [
+            const Text("Intimacy Maze", style: TextStyle(fontSize: 16)),
+            Text("Room: ${gameProvider.roomId}",
+                style:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          ],
+        ),
         actions: [
           IconButton(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: gameProvider.roomId ?? ""));
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text("Room code copied! Share with partner.")));
+            },
+            icon: const Icon(Icons.copy),
+          ),
+          IconButton(
             onPressed: () => gameProvider.reset(),
-            icon: const Icon(CupertinoIcons.restart),
+            icon: const Icon(CupertinoIcons.power),
           )
         ],
       ),
@@ -36,6 +175,7 @@ class MazeGrid extends StatelessWidget {
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // --- THE GRID ---
               Expanded(
                 child: GridView.builder(
                   itemCount: 30,
@@ -54,7 +194,6 @@ class MazeGrid extends StatelessWidget {
                     String textToShow = "$cellNumber";
 
                     if (p1Here && p2Here) {
-                      // Both players on same cell
                       cellColor = color.playerCell("s");
                       textToShow = Ion.heart;
                     } else if (p1Here) {
@@ -81,16 +220,14 @@ class MazeGrid extends StatelessWidget {
                               Text(
                                 textToShow,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  //color: CupertinoColors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
                               ),
                             if ((textToShow == Ion.female_sharp) ||
                                 (textToShow == Ion.male_sharp) ||
                                 (textToShow == Ion.heart))
                               Iconify(textToShow,
-                                  size: 60,
+                                  size: 30,
                                   color: textToShow == Ion.heart
                                       ? color.playerIcons("s")
                                       : textToShow != Ion.female_sharp
@@ -103,24 +240,48 @@ class MazeGrid extends StatelessWidget {
                   },
                 ),
               ),
+
+              // --- WAITING MSG ---
+              if (isWaiting)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  color: Colors.amber.shade100,
+                  child: Row(
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: Text(
+                          "Share Code: ${gameProvider.roomId}\nWaiting for partner to join...",
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // --- TASK AREA ---
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
+                    width: double.infinity,
                     decoration: BoxDecoration(
                         color: color.placeHolders(),
                         borderRadius: BorderRadius.circular(12)),
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(12.0),
                       child: AutoSizeText(
                         gameProvider.task,
                         maxLines: 3,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 16),
                       ),
                     )),
               ),
-              SizedBox(
-                  height: Responsive.isMobile(context)
-                      ? MediaQuery.of(context).size.height * 0.03
-                      : 0),
+
+              SizedBox(height: Responsive.isMobile(context) ? 10 : 0),
+
+              // --- CONTROLS ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -136,14 +297,27 @@ class MazeGrid extends StatelessWidget {
                               ? color.playerIcons("m")
                               : color.playerIcons("f")),
                       Text(
-                          "${gameProvider.currentPlayer == 1 ? "Male" : "Female"} Turn"),
+                        gameProvider.isMyTurn ? "YOUR TURN" : "PARTNER'S TURN",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: gameProvider.isMyTurn
+                                ? Colors.green
+                                : Colors.grey),
+                      ),
                     ],
                   ),
                   const SizedBox(width: 20),
-                  const DiceRollerPage(),
+                  // Disable dice if not playing or not my turn
+                  Opacity(
+                    opacity: (gameProvider.isMyTurn && !isWaiting) ? 1.0 : 0.4,
+                    child: IgnorePointer(
+                      ignoring: (!gameProvider.isMyTurn || isWaiting),
+                      child: const DiceRollerPage(),
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 5)
+              const SizedBox(height: 10)
             ],
           );
         }),
@@ -152,7 +326,7 @@ class MazeGrid extends StatelessWidget {
   }
 }
 
-// ------------------ DICE ROLLER ------------------
+// ------------------ DICE ROLLER (UPDATED) ------------------
 
 class DiceRollerPage extends StatefulWidget {
   const DiceRollerPage({super.key});
@@ -183,26 +357,22 @@ class _DiceRollerPageState extends State<DiceRollerPage>
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
 
-    // Default rotations (will be reset on each roll)
     _rotationX = Tween<double>(begin: 0, end: 0).animate(_controller);
     _rotationY = Tween<double>(begin: 0, end: 0).animate(_controller);
 
-    // When animation ends, finalize the dice face
     _controller.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        // Stop cycling
         _randomizerTimer?.cancel();
         setState(() {
           _currentDiceValue = _finalDiceValue;
         });
 
-        // Once dice stops, move the current player by finalDiceValue with animation
+        // --- MULTIPLAYER ACTION ---
         await context.read<GameProvider>().advancePlayer(_finalDiceValue);
       }
     });
@@ -219,14 +389,11 @@ class _DiceRollerPageState extends State<DiceRollerPage>
     if (_controller.isAnimating) return;
 
     setState(() {
-      // Choose a final face and random rotations
       _finalDiceValue = Random().nextInt(6) + 1;
 
-      // Randomize how many spins (each spin ~ 2π)
-      double spinsX = Random().nextInt(2) + 2; // between 2 and 3 full rotations
-      double spinsY = Random().nextInt(2) + 2; // between 2 and 3 full rotations
+      double spinsX = Random().nextInt(2) + 2.0;
+      double spinsY = Random().nextInt(2) + 2.0;
 
-      // Random direction: positive or negative rotation
       if (Random().nextBool()) spinsX = -spinsX;
       if (Random().nextBool()) spinsY = -spinsY;
 
@@ -238,11 +405,9 @@ class _DiceRollerPageState extends State<DiceRollerPage>
       _controller.reset();
     });
 
-    // During the animation, rapidly change the dice face to simulate tumbling
     _randomizerTimer?.cancel();
     _randomizerTimer =
         Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      // Set a random face while rolling
       setState(() {
         _currentDiceValue = Random().nextInt(6) + 1;
       });
@@ -257,9 +422,8 @@ class _DiceRollerPageState extends State<DiceRollerPage>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        // Apply 3D-like transforms. A perspective transform adds realism.
         final transform = Matrix4.identity()
-          ..setEntry(3, 2, 0.001) // perspective
+          ..setEntry(3, 2, 0.001)
           ..rotateX(_rotationX.value)
           ..rotateY(_rotationY.value);
 

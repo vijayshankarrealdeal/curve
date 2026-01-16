@@ -1,78 +1,202 @@
+import 'dart:async';
 import 'dart:math';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curve/logs/grid_tasks.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class GameProvider extends ChangeNotifier {
-  int player1Position = 1; // We'll treat these as 1-based board positions.
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  StreamSubscription<DocumentSnapshot>? _gameStream;
+
+  // Game State
+  String? roomId;
+  bool isMultiplayer = false;
+  bool isHost = false; // Player 1
+  String status = 'idle'; // idle, waiting, playing
+
+  int player1Position = 1;
   int player2Position = 1;
   int currentPlayer = 1; // 1 or 2
-  static List<String> starterTasks = [
-    "Look deeply into each other's eyes and silently communicate your feelings.",
-    "Synchronize your breathing, inhaling and exhaling together for a few moments.",
-    "Give your partner a gentle, affirming touch that communicates appreciation.",
-    "Whisper a simple desire or something you find attractive about your partner into their ear.",
-    "Tell your partner what you admire about them the most, and hold their hand.",
-    "Gently caress your partner’s arm, back or neck with soft, slow movements.",
-    "Give a tender kiss to any body part that you find appealing.",
-    "Share a cherished memory with your partner, focusing on the emotional connection.",
-    "Tell your partner what is your favorite feature on their body",
-    "Share 3 things you love about the other person",
-  ];
-  String task = "Before Rolling Dice: ${starterTasks[0]}";
-  void reset() {
-    player1Position = 1; // We'll treat these as 1-based board positions.
+  String task = "Welcome! Create or Join a game to start.";
+
+  // Local helper to know if it's "my" turn
+  bool get isMyTurn {
+    if (!isMultiplayer) return true; // Offline mode (if you want to keep it)
+    if (status != 'playing') return false;
+    if (isHost && currentPlayer == 1) return true;
+    if (!isHost && currentPlayer == 2) return true;
+    return false;
+  }
+
+  // --- 1. LOBBY LOGIC ---
+
+  // Host creates a game
+  Future<String> createGame() async {
+    isMultiplayer = true;
+    isHost = true;
+    player1Position = 1;
     player2Position = 1;
-    currentPlayer = 1; // 1 or 2
-    task =
-        "Before Rolling Dice: ${starterTasks[Random().nextInt(starterTasks.length)]}";
+    currentPlayer = 1;
+
+    // Generate a simple 6-digit code
+    roomId = (Random().nextInt(900000) + 100000).toString();
+
+    try {
+      await _firestore.collection('games').doc(roomId).set({
+        'roomId': roomId,
+        'player1Id': _auth.currentUser?.uid,
+        'player2Id': null,
+        'player1Position': 1,
+        'player2Position': 1,
+        'currentPlayer': 1,
+        'task': "Waiting for player to join...",
+        'status': 'waiting', // waiting for p2
+        'lastDiceValue': 0,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      _listenToGame();
+      return roomId!;
+    } catch (e) {
+      isMultiplayer = false;
+      throw Exception("Failed to create game: $e");
+    }
+  }
+
+  // Guest joins a game
+  Future<void> joinGame(String inputCode) async {
+    final docRef = _firestore.collection('games').doc(inputCode);
+    final doc = await docRef.get();
+
+    if (!doc.exists) {
+      throw Exception("Room not found");
+    }
+
+    final data = doc.data() as Map<String, dynamic>;
+    if (data['status'] == 'playing') {
+      // Simple check if full
+      // You could check if player2Id is already set
+      if (data['player2Id'] != null &&
+          data['player2Id'] != _auth.currentUser?.uid) {
+        throw Exception("Room is full");
+      }
+    }
+
+    // Join
+    roomId = inputCode;
+    isMultiplayer = true;
+    isHost = false; // Player 2
+
+    await docRef.update({
+      'player2Id': _auth.currentUser?.uid,
+      'status': 'playing',
+      'task': "Player 2 Joined! Player 1, roll the dice.",
+    });
+
+    _listenToGame();
+  }
+
+  // Listen to Firestore changes
+  void _listenToGame() {
+    if (roomId == null) return;
+
+    _gameStream?.cancel();
+    _gameStream = _firestore
+        .collection('games')
+        .doc(roomId)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.exists) {
+        final data = snapshot.data() as Map<String, dynamic>;
+
+        player1Position = data['player1Position'];
+        player2Position = data['player2Position'];
+        currentPlayer = data['currentPlayer'];
+        task = data['task'];
+        status = data['status'];
+
+        notifyListeners();
+      }
+    });
+  }
+
+  // Leave/Reset
+  void reset() {
+    // If multiplayer, maybe delete room or remove player?
+    // For now, just reset local state and stop listening
+    _gameStream?.cancel();
+    roomId = null;
+    isMultiplayer = false;
+    status = 'idle';
+    player1Position = 1;
+    player2Position = 1;
+    currentPlayer = 1;
+    task = "Game Reset.";
     notifyListeners();
   }
 
-  // Asynchronously move the current player step-by-step
+  // --- 2. GAMEPLAY LOGIC ---
+
   Future<void> advancePlayer(int steps) async {
-    if ((player1Position == 30) || (player2Position == 30)) {
-      return;
-    }
+    if (!isMultiplayer) return; // Handle offline logic separately if needed
+    if (!isMyTurn) return; // Security check
 
-    for (int i = 0; i < steps; i++) {
-      if (currentPlayer == 1) {
-        player1Position++;
-        if (player1Position > 30) player1Position = 30;
-      } else {
-        player2Position++;
-        if (player2Position > 30) player2Position = 30;
-      }
-
-      notifyListeners();
-      // Wait a bit to simulate sliding (step-by-step movement)
-      await Future.delayed(const Duration(milliseconds: 200));
-    }
-
-    // After finishing movement, check for collision
-    if (player1Position == player2Position && player1Position != 1) {
-      // Both players on same cell, knock out the occupant
-      // The occupant is considered the player who was there first.
-      // For simplicity: The newly arrived player knocks out the other.
-      // Which player arrived last? The current player just moved, so they are the "arriver".
-      // The other player gets knocked back to start:
-      // Kiss each other looking into the eyes.
-      task =
-          "Let your eyes meet and then let your tongue slide over their lips.";
-      notifyListeners();
+    int newPos;
+    if (isHost) {
+      // Player 1
+      newPos = player1Position + steps;
+      if (newPos > 30) newPos = 30;
     } else {
-      String text = gridCells[player1Position]![Random().nextInt(4)];
-      if (player1Position > player2Position) {
-        task = generateTaskMessages("Male", text)[player1Position] ?? "";
-        notifyListeners();
+      // Player 2
+      newPos = player2Position + steps;
+      if (newPos > 30) newPos = 30;
+    }
+
+    String newTask = "";
+    int nextPlayer = (currentPlayer == 1) ? 2 : 1;
+
+    // Check Collision (Logic from your original code)
+    // Note: We use the local 'newPos' against the 'other' player's current DB pos
+    int otherPlayerPos = isHost ? player2Position : player1Position;
+
+    bool collision = (newPos == otherPlayerPos) && (newPos != 1);
+
+    if (collision) {
+      newTask =
+          "Let your eyes meet and then let your tongue slide over their lips.";
+      // Special rule: collision usually knocks someone back or keeps them together.
+      // Your original logic kept them together.
+    } else {
+      // Generate Task
+      List<String>? cellTasks = gridCells[newPos];
+      if (cellTasks != null && cellTasks.isNotEmpty) {
+        String text = cellTasks[Random().nextInt(cellTasks.length)];
+        String gender = isHost ? "Male" : "Female"; // Or strictly P1/P2 logic
+        // P1 moves -> generates task for P1
+        // Using your helper function:
+        Map<int, String> msgs = generateTaskMessages(gender, text);
+        newTask = msgs[newPos] ?? text;
       } else {
-        task = generateTaskMessages("Female", text)[player2Position] ?? "";
-        notifyListeners();
+        newTask = "Rest and enjoy the moment.";
       }
     }
-    // Switch player turn
-    currentPlayer = (currentPlayer == 1) ? 2 : 1;
-    notifyListeners();
+
+    // Update Firestore
+    Map<String, dynamic> updates = {
+      'currentPlayer': nextPlayer,
+      'task': newTask,
+      'lastDiceValue': steps,
+    };
+
+    if (isHost) {
+      updates['player1Position'] = newPos;
+    } else {
+      updates['player2Position'] = newPos;
+    }
+
+    await _firestore.collection('games').doc(roomId).update(updates);
   }
 }

@@ -14,10 +14,16 @@ class CardScratch extends StatelessWidget {
   Widget build(BuildContext context) {
     final GlobalKey<ScratcherState> key = GlobalKey();
 
+    // Placeholder URL or your future Firebase URL
+    // Note: Pinterest URLs often block CORS on web.
+    // See instructions below on how to run to fix this.
+    final String imageUrl =
+        "https://nyc.cloud.appwrite.io/v1/storage/buckets/696a6c5f00017c372cdc/files/696a6c77002ad9eaf43d/view?project=696a6c4a00150de3707a&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk2YTZjYmFiN2M2ZmExZWMyZmYiLCJyZXNvdXJjZUlkIjoiNjk2YTZjNWYwMDAxN2MzNzJjZGM6Njk2YTZjNzcwMDJhZDllYWY0M2QiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6Ijg3MTk0OjIiLCJpYXQiOjE3Njg1ODIzMzB9.oynTFTDxlq5vZdiFgvE4XqAFmGjQl0nXTb-Iyyqxzkk";
+
     return Consumer<ScratchProvider>(builder: (context, scPro, _) {
       return Scaffold(
         appBar: AppBar(
-          title: Text("Odyssey"),
+          title: const Text("Odyssey"),
         ),
         body: LayoutBuilder(builder: (context, constraint) {
           final size = constraint.maxWidth * 0.9;
@@ -25,36 +31,33 @@ class CardScratch extends StatelessWidget {
             children: [
               Center(
                 child: ClipRRect(
-                  
                   borderRadius: BorderRadius.circular(20),
-                  child: Consumer<ColorsProvider>(
-                    builder: (context, colorPro, _) {
-                      return Scratcher(
-                        key: key,
-                        color: scPro.thresholdReached
-                            ? Colors.transparent
-                            : colorPro.scratchCard(),
-                        threshold: 45,
-                        brushSize: 65,
-                        onScratchEnd: () {},
-                        onThreshold: () => scPro.setThresholdReached(),
-                        onScratchUpdate: () {},
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: CupertinoColors.black,
-                            borderRadius: BorderRadius.circular(20),
-                            image: DecorationImage(
-                              image: CachedNetworkImageProvider(
-                                  "https://i.pinimg.com/736x/87/4a/74/874a7481bbe0cab8f51827722dde96ec.jpg"),
-                              fit: BoxFit.cover,
-                            ),
+                  child:
+                      Consumer<ColorsProvider>(builder: (context, colorPro, _) {
+                    return Scratcher(
+                      key: key,
+                      color: scPro.thresholdReached
+                          ? Colors.transparent
+                          : colorPro.scratchCard(),
+                      threshold: 45,
+                      brushSize: 65,
+                      onScratchEnd: () {},
+                      onThreshold: () => scPro.setThresholdReached(),
+                      onScratchUpdate: () {},
+                      child: Container(
+                        width: size,
+                        height: size,
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.black,
+                          borderRadius: BorderRadius.circular(20),
+                          image: DecorationImage(
+                            image: CachedNetworkImageProvider(imageUrl),
+                            fit: BoxFit.cover,
                           ),
-                          width: size,
-                          height: size,
                         ),
-                      );
-                    }
-                  ),
+                      ),
+                    );
+                  }),
                 ),
               ),
               (scPro.thresholdReached && (scPro.animationEnded == false))
@@ -86,7 +89,7 @@ class CardScratch extends StatelessWidget {
                         alignment: Alignment.bottomCenter,
                         child: TextButton(
                           onPressed: () {},
-                          child: Text("Know More"),
+                          child: const Text("Know More"),
                         ),
                       ),
                     )
@@ -96,7 +99,7 @@ class CardScratch extends StatelessWidget {
         }),
         floatingActionButton: scPro.thresholdReached
             ? FloatingActionButton(
-                child: Icon(
+                child: const Icon(
                   CupertinoIcons.refresh,
                 ),
                 onPressed: () {
