@@ -1,6 +1,6 @@
 import 'package:curve/models/four_card_model.dart';
 import 'package:curve/services/colors_provider.dart';
-import 'package:curve/services/content_provider.dart'; // Import ContentProvider
+import 'package:curve/services/content_provider.dart';
 import 'package:curve/services/language_provider.dart';
 import 'package:curve/services/responsive.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +60,7 @@ class _FourCardsState extends State<FourCards> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
-    final content = Provider.of<ContentProvider>(context); // Get Provider
+    final content = Provider.of<ContentProvider>(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(lang.getText('4_cards'))),
@@ -73,14 +73,12 @@ class _FourCardsState extends State<FourCards> with TickerProviderStateMixin {
                     ? 0
                     : MediaQuery.of(context).size.width * 0.35),
             child: GridView.builder(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0), // Increased padding
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisSpacing: Responsive.isMobile(context) ? 4 : 10,
-                crossAxisSpacing: Responsive.isMobile(context) ? 4 : 10,
-                mainAxisExtent: Responsive.isMobile(context)
-                    ? MediaQuery.of(context).size.height * 0.35
-                    : MediaQuery.of(context).size.height * 0.3,
+                mainAxisSpacing: 15, // Better spacing
+                crossAxisSpacing: 15,
+                childAspectRatio: 0.7, // Adjust aspect ratio for card shape
               ),
               itemCount: 4,
               itemBuilder: (context, index) {
@@ -88,7 +86,6 @@ class _FourCardsState extends State<FourCards> with TickerProviderStateMixin {
                 int cardNumber = words[index].cardNumber;
                 String task = "";
 
-                // USE PROVIDER DATA
                 List<String> taskList = content.fourCardsData[cardNumber] ?? [];
 
                 if (taskList.isNotEmpty) {
@@ -119,27 +116,24 @@ class _FourCardsState extends State<FourCards> with TickerProviderStateMixin {
                         child: Container(
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                              opacity: 0.85,
-                              fit: BoxFit.fill,
+                              opacity: 0.9,
+                              // CHANGED: Use BoxFit.cover to fix stretching
+                              fit: BoxFit.cover,
                               image: AssetImage(
                                   "assets/images/c${words[index].cardNumber}.jpg"),
                             ),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                  color: Colors.black.withAlpha(233),
-                                  blurRadius: 4,
-                                  offset: const Offset(2, 2))
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(2, 4))
                             ],
                           ),
                           child: Center(
                             child: showBack
-                                ? Container()
-                                : const Text("",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold)),
+                                ? Container() // Shows "back" (blank)
+                                : const SizedBox(),
                           ),
                         ),
                       );
@@ -149,49 +143,78 @@ class _FourCardsState extends State<FourCards> with TickerProviderStateMixin {
               },
             ),
           ),
+
+          // Overlay Task Card
           if (_showTask)
             Positioned.fill(
               child: Stack(
                 children: [
-                  Container(color: Colors.black.withOpacity(0.4)),
+                  GestureDetector(
+                    onTap: _closeTask, // Close on background tap
+                    child: Container(color: Colors.black.withOpacity(0.6)),
+                  ),
                   BackdropFilter(
-                    filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(color: Colors.black.withOpacity(0)),
+                    filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    child: Container(color: Colors.transparent),
                   ),
                   Center(
                     child:
                         Consumer<ColorsProvider>(builder: (context, color, _) {
                       return Container(
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        height: MediaQuery.of(context).size.height * 0.6,
+                        width: MediaQuery.of(context).size.width * 0.85,
+                        constraints:
+                            const BoxConstraints(maxWidth: 400, maxHeight: 500),
                         decoration: BoxDecoration(
                           color: color.taskCard(),
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
                             BoxShadow(
                                 color: Colors.black.withAlpha(90),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4))
+                                blurRadius: 15,
+                                offset: const Offset(0, 5))
                           ],
                         ),
-                        padding: const EdgeInsets.all(24.0),
+                        padding: const EdgeInsets.all(30.0),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              _selectedTask,
-                              style: const TextStyle(
-                                  fontSize: 28, fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.center,
+                            const Icon(Icons.favorite,
+                                color: Colors.pinkAccent, size: 40),
+                            const SizedBox(height: 20),
+                            Expanded(
+                              child: Center(
+                                child: Text(
+                                  _selectedTask,
+                                  style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                             ),
+                            const SizedBox(height: 20),
                             Text(
                               lang.getText('task_prompt'),
-                              style: const TextStyle(fontSize: 18),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: color
+                                      .navBarIconActiveColor()
+                                      .withOpacity(0.6)),
                               textAlign: TextAlign.center,
                             ),
-                            TextButton(
-                              onPressed: _closeTask,
-                              child: Text(lang.getText('close')),
+                            const SizedBox(height: 30),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: _closeTask,
+                                style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 15),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12))),
+                                child: Text(lang.getText('close')),
+                              ),
                             ),
                           ],
                         ),
