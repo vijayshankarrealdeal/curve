@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:curve/services/language_provider.dart'; // Import
 import 'package:curve/services/responsive.dart';
 import 'package:curve/models/model.dart';
 import 'package:curve/routes/four_cards.dart';
@@ -11,15 +12,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/mdi.dart';
+import 'package:provider/provider.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Listen to LanguageProvider
+    final lang = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text("Curves"),
+        title: Text(lang.getText('app_name')),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -27,10 +32,10 @@ class Home extends StatelessWidget {
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (ctx) => Settings(),
+                  builder: (ctx) => const Settings(),
                 ),
               ),
-              icon: Icon(CupertinoIcons.gear),
+              icon: const Icon(CupertinoIcons.gear),
             ),
           ),
         ],
@@ -38,8 +43,8 @@ class Home extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: GridView.custom(
-          shrinkWrap: true, // Prevents the GridView from scrolling
-          physics: NeverScrollableScrollPhysics(), // Disables scrolling
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverWovenGridDelegate.count(
             crossAxisCount: 2,
             mainAxisSpacing: 0.5,
@@ -60,56 +65,57 @@ class Home extends StatelessWidget {
               List<AppCardsHome> cards = [
                 AppCardsHome(
                   cardColor: Colors.red.shade900,
-                  title: "4 Cards",
+                  title: lang.getText('4_cards'), // Translated
                   textColor: Colors.red.shade50,
                   extraIcon: Mdi.cards_playing,
                   iconColor: Colors.red.shade50,
                 ),
                 AppCardsHome(
                     cardColor: Colors.blueGrey.shade900,
-                    title: "Keyword Obsession",
+                    title: lang.getText('keyword'), // Translated
                     textColor: Colors.blueGrey.shade50,
                     iconAdd: CupertinoIcons.textformat,
                     iconColor: Colors.blueGrey.shade50),
                 AppCardsHome(
                   cardColor: Colors.pink.shade900,
-                  title: "Truth or Dare",
+                  title: lang.getText('truth_dare'), // Translated
                   textColor: Colors.pink.shade50,
                   iconColor: Colors.pink.shade50,
                   iconAdd: CupertinoIcons.hand_raised_fill,
                 ),
                 AppCardsHome(
                   cardColor: Colors.purple.shade900,
-                  title: "Intimacy Maze",
+                  title: lang.getText('maze'), // Translated
                   textColor: Colors.purple.shade50,
                   iconColor: Colors.purple.shade50,
                   iconAdd: CupertinoIcons.grid,
                 ),
               ];
+              // Logic to handle taps (comparing index is safer than title now that titles change)
               return GestureDetector(
                 onTap: () {
-                  if (cards[index].title == "Intimacy Maze") {
+                  if (index == 3) {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (ctx) => MazeGrid()));
-                  } else if (cards[index].title == "Truth or Dare") {
+                        MaterialPageRoute(builder: (ctx) => const MazeGrid()));
+                  } else if (index == 2) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (ctx) => TruthDareCardPage(),
+                        builder: (ctx) => const TruthDareCardPage(),
                       ),
                     );
-                  } else if (cards[index].title == "Keyword Obsession") {
+                  } else if (index == 1) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (ctx) => KeywordObesseion(),
+                        builder: (ctx) => const KeywordObesseion(),
                       ),
                     );
-                  } else if (cards[index].title == "4 Cards") {
+                  } else if (index == 0) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (ctx) => FourCards(),
+                        builder: (ctx) => const FourCards(),
                       ),
                     );
                   }

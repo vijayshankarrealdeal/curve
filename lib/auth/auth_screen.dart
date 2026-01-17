@@ -39,7 +39,7 @@ class AuthScreen extends StatelessWidget {
                             child: Column(
                               children: [
                                 Text(
-                                  "Curves",
+                                  "EvesDrops",
                                   style:
                                       Theme.of(context).textTheme.displayLarge,
                                 ),

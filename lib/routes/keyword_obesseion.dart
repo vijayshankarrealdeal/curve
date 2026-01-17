@@ -1,14 +1,14 @@
 import 'dart:math';
 import 'package:curve/services/settings_model.dart';
+import 'package:curve/services/language_provider.dart'; // Import
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class KeywordObesseion extends StatelessWidget {
   const KeywordObesseion({super.key});
 
-  Future<void> _showTasksDialog(
-      BuildContext context, String category, categoryTasks) async {
-    // We'll manage tasks and current task inside setState of a StatefulBuilder in the dialog
+  Future<void> _showTasksDialog(BuildContext context, String category,
+      categoryTasks, LanguageProvider lang) async {
     List<String> tasks = List.of(categoryTasks[category]!);
     String? currentTask = _pickRandomTask(tasks);
 
@@ -18,9 +18,9 @@ class KeywordObesseion extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text(category),
+              title: Text(lang.getText(category)), // Translate title
               content: currentTask == null
-                  ? const Text("No more tasks available!")
+                  ? Text(lang.getText('no_more_tasks'))
                   : AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
                       child: Card(
@@ -42,17 +42,16 @@ class KeywordObesseion extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text("Close"),
+                  child: Text(lang.getText('close')),
                 ),
                 if (currentTask != null)
                   ElevatedButton(
                     onPressed: () {
-                      // Pick next task
                       setState(() {
                         currentTask = _pickRandomTask(tasks);
                       });
                     },
-                    child: const Text("Next Task"),
+                    child: Text(lang.getText('next_task')),
                   ),
               ],
             );
@@ -66,16 +65,17 @@ class KeywordObesseion extends StatelessWidget {
     if (tasks.isEmpty) return null;
     final randomIndex = Random().nextInt(tasks.length);
     final chosenTask = tasks[randomIndex];
-    tasks.removeAt(randomIndex); // remove chosen to avoid repetition
+    tasks.removeAt(randomIndex);
     return chosenTask;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Display categories as Chips inside a Wrap
+    final lang = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Keyword Obsession'),
+        title: Text(lang.getText('keyword')),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -86,9 +86,9 @@ class KeywordObesseion extends StatelessWidget {
             children:
                 settingModels.categories.where((e) => e.isSelected).map((cat) {
               return ActionChip(
-                label: Text(cat.name),
-                onPressed: () => _showTasksDialog(
-                    context, cat.name, settingModels.generateCategoryTasks()),
+                label: Text(lang.getText(cat.name)), // Translate category name
+                onPressed: () => _showTasksDialog(context, cat.name,
+                    settingModels.generateCategoryTasks(), lang),
               );
             }).toList(),
           );

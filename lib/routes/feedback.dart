@@ -120,7 +120,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 children: [
                   // 1. Overall Experience (Star Rating)
                   const Text(
-                    '1. How would you describe your overall experience using Curves?',
+                    '1. How would you describe your overall experience using EvesDrops?',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
@@ -227,7 +227,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
                   // 5. Any other feedback
                   const Text(
-                    '5. Do you have any other feedback that could help us make Curves better?',
+                    '5. Do you have any other feedback that could help us make EvesDrops better?',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),

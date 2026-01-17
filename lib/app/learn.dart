@@ -1,9 +1,9 @@
 import 'package:curve/routes/learn_details.dart';
 import 'package:curve/services/colors_provider.dart';
 import 'package:curve/services/learn_provider.dart';
+import 'package:curve/services/language_provider.dart'; // Import
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 
 class Learn extends StatelessWidget {
@@ -11,11 +11,11 @@ class Learn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<LearnProvider, ColorsProvider>(
-      builder: (context, learn, colorx, _) {
+    return Consumer3<LearnProvider, ColorsProvider, LanguageProvider>(
+      builder: (context, learn, colorx, lang, _) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text("Wellness & Intimacy"),
+            title: Text(lang.getText('wellness_intimacy')), // Translated
             centerTitle: true,
           ),
           body: learn.isLoading
@@ -35,8 +35,7 @@ class Learn extends StatelessWidget {
                                 builder: (ctx) => LearnDetail(article))),
                         child: Container(
                           decoration: BoxDecoration(
-                            color:
-                                colorx.placeHolders(), // Uses your theme color
+                            color: colorx.placeHolders(),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
@@ -57,7 +56,8 @@ class Learn extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        article.title,
+                                        article
+                                            .title, // Usually DB content, but could map if needed
                                         style: Theme.of(context)
                                             .textTheme
                                             .headlineSmall!
@@ -76,7 +76,6 @@ class Learn extends StatelessWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 12),
-                                // Preview Text
                                 Text(
                                   article.introduction,
                                   maxLines: 3,
@@ -110,7 +109,7 @@ class Learn extends StatelessWidget {
                                                   .navBarIconActiveColor()),
                                           const SizedBox(width: 5),
                                           Text(
-                                            "${article.sectionsCount} Sections",
+                                            "${article.sectionsCount} ${lang.getText('sections_count')}", // Translated
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .labelSmall,
@@ -121,7 +120,8 @@ class Learn extends StatelessWidget {
                                     Row(
                                       children: [
                                         Text(
-                                          "Read Guide",
+                                          lang.getText(
+                                              'read_guide'), // Translated
                                           style: TextStyle(
                                               color: colorx.seedColorColor(),
                                               fontWeight: FontWeight.w600),

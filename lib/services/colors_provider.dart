@@ -79,7 +79,7 @@ class ColorsProvider extends ChangeNotifier {
 
   Color placeHolders() {
     if (darkMode) {
-      return CupertinoColors.placeholderText;
+      return CupertinoColors.darkBackgroundGray.withAlpha(123);
     }
     return CupertinoColors.extraLightBackgroundGray;
   }
@@ -153,25 +153,23 @@ class ColorsProvider extends ChangeNotifier {
       ];
     }
     return [
-      [
-        CupertinoColors.activeBlue,
-        CupertinoColors.secondarySystemBackground
-      ],
+      [CupertinoColors.activeBlue, CupertinoColors.secondarySystemBackground],
       [
         CupertinoColors.systemPurple,
         CupertinoColors.extraLightBackgroundGray,
       ],
     ];
   }
-  Color lodingColor(){
-    if(darkMode){
+
+  Color lodingColor() {
+    if (darkMode) {
       return CupertinoColors.activeBlue;
     }
     return Colors.black;
   }
 
-  Color taskCard(){
-    if(darkMode){
+  Color taskCard() {
+    if (darkMode) {
       return CupertinoColors.darkBackgroundGray;
     }
     return CupertinoColors.extraLightBackgroundGray;

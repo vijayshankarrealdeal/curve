@@ -1,11 +1,13 @@
 import 'package:curve/services/cart_provider.dart';
 import 'package:curve/services/colors_provider.dart';
+import 'package:curve/services/content_provider.dart' show ContentProvider;
 import 'package:curve/services/gird_provider.dart';
 import 'package:curve/services/learn_provider.dart';
 import 'package:curve/services/scratch_provider.dart';
 import 'package:curve/app/home.dart';
 import 'package:curve/services/state.dart';
 import 'package:curve/services/settings_model.dart';
+import 'package:curve/services/language_provider.dart'; // Import
 import 'package:curve/app/card_scratch.dart';
 import 'package:curve/app/learn.dart';
 import 'package:curve/auth/auth.dart';
@@ -38,6 +40,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ScratchProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => LearnProvider()),
+        ChangeNotifierProvider(
+            create: (_) => LanguageProvider()), // Add Provider
+        ChangeNotifierProvider(create: (_) => ContentProvider()),
       ],
       child: const MyApp(),
     ),
@@ -49,16 +54,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ColorsProvider, AuthProvider>(
-        builder: (context, colorProvider, auth, _) {
+    return Consumer3<ColorsProvider, AuthProvider, LanguageProvider>(
+        builder: (context, colorProvider, auth, lang, _) {
       return MaterialApp(
         title: 'eavesdrops',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           textTheme: GoogleFonts.ptSansTextTheme().apply(
-            bodyColor: colorProvider.navBarIconActiveColor(),
-            displayColor: colorProvider.navBarIconActiveColor(),
-          ),
+              // bodyColor: colorProvider.navBarIconActiveColor(),
+              // displayColor: colorProvider.navBarIconActiveColor(),
+              ),
           floatingActionButtonTheme: FloatingActionButtonThemeData(
               backgroundColor: colorProvider.playerCell("s")),
           appBarTheme: AppBarTheme(color: colorProvider.getAppBarColor()),
@@ -93,14 +98,8 @@ class AppPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<NavBar, ColorsProvider>(
       builder: (context, navBar, colorPro, _) {
-        // BUG FIX: Removed the redundant MultiProvider.
-        // The global one in main() already provides these.
         return Scaffold(
-          body: [
-            const Home(),
-            const CardScratch(),
-            const Learn()
-          ][navBar.idx],
+          body: [const Home(), const CardScratch(), const Learn()][navBar.idx],
           bottomNavigationBar: NavigationBar(
             backgroundColor: colorPro.getAppBarColor(),
             selectedIndex: navBar.idx,
