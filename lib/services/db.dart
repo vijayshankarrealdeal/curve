@@ -121,4 +121,12 @@ class DatabaseService {
       print("Error logging chat: $e");
     }
   }
+  Stream<QuerySnapshot> getChatHistory(String userId) {
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('chat_history')
+        .orderBy('timestamp', descending: false) // Oldest first
+        .snapshots();
+  }
 }
