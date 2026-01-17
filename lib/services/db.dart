@@ -5,30 +5,25 @@ class DatabaseService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   // --- User Management ---
-  /// Creates a user document if it doesn't exist, or updates last_login if it does.
   Future<void> createUser(String uid, String email) async {
     try {
       final userDoc = _db.collection('users').doc(uid);
       final docSnapshot = await userDoc.get();
 
       if (!docSnapshot.exists) {
-        // Create new user document
         await userDoc.set({
           'uid': uid,
           'email': email,
           'created_at': FieldValue.serverTimestamp(),
           'last_login': FieldValue.serverTimestamp(),
-          // Add default settings or other fields here if needed
         });
       } else {
-        // User exists, update last_login
         await userDoc.update({
           'last_login': FieldValue.serverTimestamp(),
         });
       }
     } catch (e) {
       print("Error creating/updating user in Firestore: $e");
-      // Decide if you want to throw exception to block auth or just log it
       throw Exception("Failed to save user data.");
     }
   }
@@ -58,6 +53,28 @@ class DatabaseService {
     }
   }
 
+  // --- Report System (NEW) ---
+  Future<void> submitReport({
+    required String type,
+    required String subject,
+    required String description,
+    required String userId,
+  }) async {
+    try {
+      await _db.collection('reports').add({
+        'type': type,
+        'subject': subject,
+        'description': description,
+        'user_id': userId,
+        'status': 'open',
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print("Error submitting report: $e");
+      throw Exception("Failed to submit report.");
+    }
+  }
+
   // --- Learn Content (Articles) ---
   Future<List<Article>> getArticles() async {
     try {
@@ -65,7 +82,6 @@ class DatabaseService {
           await _db.collection('articles').orderBy('id').get();
       return snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        // If your JSON model expects 'id' to be an int, ensure Firestore stores it as number
         return Article.fromJson(data);
       }).toList();
     } catch (e) {

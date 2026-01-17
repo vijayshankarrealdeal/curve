@@ -1,7 +1,9 @@
 import 'package:curve/services/colors_provider.dart';
 import 'package:curve/auth/auth.dart';
+import 'package:curve/routes/data_privacy.dart';
 import 'package:curve/routes/feedback.dart';
 import 'package:curve/routes/kinks.dart';
+import 'package:curve/routes/report_page.dart'; // Import Report Page
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +15,7 @@ class Settings extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Settings"),
+        title: const Text("Settings"),
       ),
       body: Consumer<ColorsProvider>(builder: (context, colorPr, _) {
         return CustomScrollView(
@@ -48,7 +50,7 @@ class Settings extends StatelessWidget {
                           ),
                         ),
                         CupertinoFormRow(
-                          prefix: Row(
+                          prefix: const Row(
                             children: [
                               Icon(
                                 CupertinoIcons.eye,
@@ -61,7 +63,7 @@ class Settings extends StatelessWidget {
                             onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (ctx) => Kinks(),
+                                builder: (ctx) => const Kinks(),
                               ),
                             ),
                             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -82,7 +84,7 @@ class Settings extends StatelessWidget {
                               onPressed: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (ctx) => FeedbackPage(),
+                                      builder: (ctx) => const FeedbackPage(),
                                     ),
                                   ),
                               padding:
@@ -101,7 +103,10 @@ class Settings extends StatelessWidget {
                             ],
                           ),
                           child: CupertinoButton(
-                              onPressed: () {},
+                              onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (ctx) => const DataPrivacy())),
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 8),
                               child:
@@ -144,7 +149,10 @@ class Settings extends StatelessWidget {
                             ],
                           ),
                           child: CupertinoButton(
-                              onPressed: () {},
+                              onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (ctx) => const ReportPage())),
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 8),
                               child:
@@ -182,7 +190,28 @@ class Settings extends StatelessWidget {
                             ],
                           ),
                           child: CupertinoButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                          title: const Text("Delete Account"),
+                                          content: const Text(
+                                              "Are you sure? This action cannot be undone."),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(ctx),
+                                                child: const Text("Cancel")),
+                                            TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(ctx);
+                                                },
+                                                child: const Text("Delete",
+                                                    style: TextStyle(
+                                                        color: Colors.red)))
+                                          ],
+                                        ));
+                              },
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 8),
                               child: const Text("Proceed")),
