@@ -61,9 +61,9 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           textTheme: GoogleFonts.ptSansTextTheme().apply(
-              // bodyColor: colorProvider.navBarIconActiveColor(),
-              // displayColor: colorProvider.navBarIconActiveColor(),
-              ),
+            bodyColor: colorProvider.navBarIconActiveColor(),
+            displayColor: colorProvider.navBarIconActiveColor(),
+          ),
           floatingActionButtonTheme: FloatingActionButtonThemeData(
               backgroundColor: colorProvider.playerCell("s")),
           appBarTheme: AppBarTheme(color: colorProvider.getAppBarColor()),

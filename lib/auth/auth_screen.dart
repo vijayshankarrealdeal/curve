@@ -38,11 +38,13 @@ class AuthScreen extends StatelessWidget {
                             key: authProvider.formKey,
                             child: Column(
                               children: [
-                                Text(
-                                  "EvesDrops",
-                                  style:
-                                      Theme.of(context).textTheme.displayLarge,
-                                ),
+                                Text("EvesDrops",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displayLarge!
+                                        .copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        )),
                                 SizedBox(
                                     height: MediaQuery.of(context).size.height *
                                         0.1),
@@ -106,7 +108,7 @@ class AuthScreen extends StatelessWidget {
                                       },
                                     ),
                                   ),
-                                const SizedBox(height: 13),
+                                const SizedBox(height: 25),
                                 authProvider.isLoading
                                     ? Consumer<ColorsProvider>(
                                         builder: (context, color, _) {
@@ -116,7 +118,7 @@ class AuthScreen extends StatelessWidget {
                                       })
                                     : Column(
                                         children: [
-                                          CupertinoButton(
+                                          OutlinedButton(
                                             onPressed: () async {
                                               if (!authProvider
                                                   .formKey.currentState!
@@ -181,9 +183,10 @@ class AuthScreen extends StatelessWidget {
                                                   .bodyMedium,
                                             ),
                                           ),
-                                          const SizedBox(height: 10),
+                                          const SizedBox(height: 30),
                                           // GOOGLE BUTTON (Handles Web & Mobile)
                                           const GoogleButton(),
+                                          const SizedBox(height: 10),
                                         ],
                                       ),
                                 TextButton(
