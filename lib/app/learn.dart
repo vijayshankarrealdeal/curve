@@ -1,3 +1,4 @@
+import 'package:curve/routes/chat_screen.dart';
 import 'package:curve/routes/learn_details.dart';
 import 'package:curve/services/colors_provider.dart';
 import 'package:curve/services/learn_provider.dart';
@@ -14,6 +15,17 @@ class Learn extends StatelessWidget {
     return Consumer3<LearnProvider, ColorsProvider, LanguageProvider>(
       builder: (context, learn, colorx, lang, _) {
         return Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (ctx) => const ChatScreen()),
+              );
+            },
+            label: Text(lang.getText('Ask Eve')), // Translated
+            icon: const Icon(CupertinoIcons.chat_bubble_2_fill),
+            backgroundColor: colorx.seedColorColor(),
+          ),
           appBar: AppBar(
             title: Text(lang.getText('wellness_intimacy')), // Translated
             centerTitle: true,

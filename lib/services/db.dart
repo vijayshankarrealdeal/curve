@@ -107,4 +107,18 @@ class DatabaseService {
       return [];
     }
   }
+
+  Future<void> logChatMessage(
+      String userId, String role, String message) async {
+    try {
+      // Save under users -> uid -> chat_history
+      await _db.collection('users').doc(userId).collection('chat_history').add({
+        'role': role, // 'user' or 'model'
+        'message': message,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print("Error logging chat: $e");
+    }
+  }
 }

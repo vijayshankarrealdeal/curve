@@ -1,4 +1,5 @@
 import 'package:curve/services/cart_provider.dart';
+import 'package:curve/services/chat_provider.dart';
 import 'package:curve/services/colors_provider.dart';
 import 'package:curve/services/content_provider.dart' show ContentProvider;
 import 'package:curve/services/gird_provider.dart';
@@ -32,6 +33,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => NavBar()),
         ChangeNotifierProvider(create: (_) => ColorsProvider()),
